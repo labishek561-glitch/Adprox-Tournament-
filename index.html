@@ -360,9 +360,9 @@
 
     </style>
 </head>
-
-<body>
-  <!-- Audio Elements for Background Music and Click Sound -->
+    
+<body> 
+    <!-- Audio Elements for Background Music and Click Sound -->
 <audio id="backgroundMusic" loop>
     <source src="fire.mp3" type="audio/mp3">
 </audio>
@@ -558,7 +558,7 @@
                 </div>
             </div>
         </section>
-      <!-- RECHARGE SECTION -->
+              <!-- RECHARGE SECTION -->
         <section id="recharge-section" class="section">
             <div id="recharge-step-1-amount">
                 <div class="text-center mb-4">
@@ -594,7 +594,7 @@
             <div id="recharge-step-2-method" style="display: none;">
                 <div class="text-center mb-4">
                     <p class="text-secondary mb-1">Recharge Amount</p>
-                      <h2 class="fw-bold">NPR<span id="rechargeAmountConfirm">200</span></h2>
+                    <h2 class="fw-bold">NPR<span id="rechargeAmountConfirm">200</span></h2>
                 </div>
                 <h3 class="section-title">Select Payment Method</h3>
                 <div id="paymentOptionsContainer">
@@ -679,8 +679,8 @@
             </div>
         </section>
 
-  </main>
-     <!-- Modals -->
+</main>
+   <!-- Modals -->
     <div class="modal fade" id="policyModalEl" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="policyModalTitleEl">Details</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body" id="policyModalBodyEl" style="min-height: 300px;"></div></div></div></div>
     <div class="modal fade" id="addAmountModalEl" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="bi bi-wallet-fill me-2"></i> How to Add Amount?</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><p>To add amount, pay via Bank Transfer or eSewa:</p><p class="text-center text-warning"><strong>Bank Details / eSewa ID:</strong> <span class="phonepe-number">[!!! YOUR PAYMENT DETAILS HERE !!!]</span></p><p class="mt-3 small"><strong><i class="bi bi-exclamation-triangle-fill text-warning"></i> IMPORTANT:</strong> After payment, upload screenshot with registered Email (<strong id="modalUserEmailEl">...</strong>). Amount added manually after verification.</p></div><div class="modal-footer"><button type="button" class="btn btn-custom btn-custom-secondary" data-bs-dismiss="modal">Got it</button></div></div></div></div>
     <div class="modal fade" id="withdrawModalEl" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i> Withdraw Funds</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><p class="small text-secondary">Withdrawable balance: <strong class="text-light" id="withdrawModalBalanceEl">NPR 0.00</strong></p><div class="mb-3"><label for="withdrawAmountInputEl" class="form-label">Amount (Min NPR <span id="minWithdrawAmountEl">100</span>)</label><input type="number" class="form-control" id="withdrawAmountInputEl" placeholder="Enter amount"></div><div class="mb-3"><label for="withdrawMethodInputEl" class="form-label">Withdrawal Method (Bank/ESewa)</label><input type="text" class="form-control" id="withdrawMethodInputEl" placeholder="Enter Bank Details / eSewa ID"></div><div id="withdrawStatusMessageEl" class="alert mt-3" style="display: none;"></div></div><div class="modal-footer"><button type="button" class="btn btn-custom btn-custom-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-custom btn-custom-primary" id="submitWithdrawRequestBtnEl">Submit Request</button></div></div></div></div>
@@ -800,8 +800,8 @@
         <button class="nav-item" data-section="leaderboard-section"><i class="bi bi-trophy-fill"></i><span>Leaderboard</span></button>
         <button class="nav-item" data-section="earnings-section"><i class="bi bi-coin"></i><span>Earnings</span></button>
         <button class="nav-item" data-section="profile-section"><i class="bi bi-person-fill"></i><span>Profile</span></button>
-  </nav>
-   <!-- JS Libraries -->
+                                                                                                                   </nav>
+          <!-- JS Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
@@ -969,8 +969,9 @@ https://labishek561-glitch.github.io/ABI-Fish-pets/`;
 
          function showSection(sectionId, backSection = null) { if (!auth || !sectionId || !elements.sections) { console.error("Cannot show section", sectionId); return; } const targetSection = getElement(sectionId); if (!targetSection) { console.error(`Section element "${sectionId}" not found.`); showSection(currentUser ? 'home-section' : 'login-section'); return; } const protectedSections = ['home-section', 'wallet-section', 'earnings-section', 'profile-section', 'tournaments-section', 'recharge-section', 'leaderboard-section']; const isLoggedIn = !!currentUser; if (protectedSections.includes(sectionId) && !isLoggedIn) { showSection('login-section'); return; } if (sectionId === 'login-section' && isLoggedIn) { showSection('home-section'); return; } elements.sections.forEach(sec => sec.classList.remove('active')); targetSection.classList.add('active'); currentSectionId = sectionId; updateHeaderForSection(sectionId, backSection); elements.bottomNavItems.forEach(item => item.classList.toggle('active', item.dataset.section === sectionId)); switch (sectionId) { case 'home-section': loadHomePageData(); break; case 'wallet-section': loadWalletData(); break; case 'profile-section': loadProfileData(); break; case 'earnings-section': loadEarningsData(); break; case 'leaderboard-section': loadLeaderboardData(); break; case 'recharge-section': break; case 'tournaments-section': if(currentTournamentGameId) { const activeTab = querySel('.tournament-tabs .tab-item.active')?.dataset.status || 'upcoming'; filterTournaments(currentTournamentGameId, activeTab); } else { elements.tournamentsListContainer.innerHTML = '<p class="text-secondary text-center mt-4">Select a game from Home page first.</p>'; } break; } if (sectionId === 'login-section') { toggleLoginForm(true); } window.scrollTo(0, 0); }
          function updateHeaderForSection(sectionId, backSection = null) { const showBackButton = (sectionId === 'tournaments-section' || sectionId === 'recharge-section'); const defaultTitleVisible = !showBackButton; let gameTitleVisible = (sectionId === 'tournaments-section'); let rechargeTitleVisible = (sectionId === 'recharge-section'); if (elements.headerBackBtn) { elements.headerBackBtn.style.display = showBackButton ? 'inline-block' : 'none'; if(showBackButton) { let targetBackSection = backSection; if (!targetBackSection) { targetBackSection = (sectionId === 'tournaments-section') ? 'home-section' : 'wallet-section'; } elements.headerBackBtn.onclick = () => showSection(targetBackSection); } } if (elements.headerTitleContainer) elements.headerTitleContainer.style.display = defaultTitleVisible ? 'flex' : 'none'; if (elements.headerGameTitle) elements.headerGameTitle.style.display = gameTitleVisible || rechargeTitleVisible ? 'block' : 'none'; if (gameTitleVisible && currentTournamentGameId && elements.headerGameTitle) { const gameName = appSettings?.games?.[currentTournamentGameId]?.name || `Game`; elements.headerGameTitle.textContent = gameName; } else if (rechargeTitleVisible && elements.headerGameTitle) { elements.headerGameTitle.textContent = 'Recharge'; } else if (defaultTitleVisible && elements.headerUserGreeting) { const nameToShow = userProfile?.displayName?.split(' ')[0] || (currentUser ? currentUser.email?.split('@')[0] : 'Guest') || 'Guest'; elements.headerUserGreeting.textContent = nameToShow; } }
-         function updateGlobalUI(isLoggedIn) { if (elements.headerWalletChip) { elements.headerWalletChip.style.display = isLoggedIn ? 'flex' : 'none'; if (isLoggedIn) elements.headerWalletChip.onclick = () => showSection('wallet-section'); else elements.headerWalletChip.onclick = null; } if (!isLoggedIn && elements.headerUserGreeting) elements.headerUserGreeting.textContent = 'Guest'; if (!isLoggedIn && elements.headerChipBalance) elements.headerChipBalance.textContent = '0'; elements.bottomNavItems.forEach(item => { const section = item.datas
-                       // ============ FIXED WALLET BALANCE FUNCTION ============
+         function updateGlobalUI(isLoggedIn) { if (elements.headerWalletChip) { elements.headerWalletChip.style.display = isLoggedIn ? 'flex' : 'none'; if (isLoggedIn) elements.headerWalletChip.onclick = () => showSection('wallet-section'); else elements.headerWalletChip.onclick = null; } if (!isLoggedIn && elements.headerUserGreeting) elements.headerUserGreeting.textContent = 'Guest'; if (!isLoggedIn && elements.headerChipBalance) elements.headerChipBalance.textContent = '0'; elements.bottomNavItems.forEach(item => { const section = item.dataset.section; item.style.display = (section === 'home-section' || isLoggedIn) ? 'flex' : 'none'; }); }
+         
+        // ============ FIXED WALLET BALANCE FUNCTION ============
          function populateUserInfo(user, profile) {
             if (!user || !profile) return;
             const displayName = profile.displayName || user.email?.split('@')[0] || 'User';
@@ -1042,9 +1043,9 @@ https://labishek561-glitch.github.io/ABI-Fish-pets/`;
                 removePlaceholders(elements.earningsReferral.closest('.placeholder-glow'));
             }
             if (elements.modalUserEmail) elements.modalUserEmail.textContent = user.email || 'N/A';
-        }
+                                                     }
 
-        function toggleLoginForm(showLogin) { if (!elements.emailLoginForm || !elements.emailSignupForm) return; clearStatusMessage(elements.loginStatusMessage); clearStatusMessage(elements.signupStatusMessage); elements.emailLoginForm.style.display = showLogin ? 'block' : 'none'; elements.emailSignupForm.style.display = showLogin ? 'none' : 'block'; elements.emailLoginForm.reset(); elements.emailSignupForm.reset(); }
+         function toggleLoginForm(showLogin) { if (!elements.emailLoginForm || !elements.emailSignupForm) return; clearStatusMessage(elements.loginStatusMessage); clearStatusMessage(elements.signupStatusMessage); elements.emailLoginForm.style.display = showLogin ? 'block' : 'none'; elements.emailSignupForm.style.display = showLogin ? 'none' : 'block'; elements.emailLoginForm.reset(); elements.emailSignupForm.reset(); }
         async function signUpWithEmail() { if (!auth) return; const name = elements.signupNameInput.value.trim(); const em = elements.signupEmailInput.value.trim(); const pw = elements.signupPasswordInput.value; if (!name || !em || !pw) { showStatusMessage(elements.signupStatusMessage, 'Name, Email and Password are required.', 'warning'); return; } if (pw.length < 6) { showStatusMessage(elements.signupStatusMessage, 'Password must be at least 6 characters.', 'warning'); return; } showLoader(true); clearStatusMessage(elements.signupStatusMessage); try { tempReferralCode = elements.signupReferralCodeInput.value.trim(); const cred = await createUserWithEmailAndPassword(auth, em, pw); await update(ref(db, `users/${cred.user.uid}`), { displayName: name }); } catch (e) { console.error("Signup Error:", e); let m = `Signup failed.`; switch (e.code) { case 'auth/email-already-in-use': m = 'Email already registered.'; break; case 'auth/weak-password': m = 'Password too weak.'; break; case 'auth/invalid-email': m = 'Invalid email.'; break; case 'auth/network-request-failed': m = 'Network error.'; break; default: m = `Error: ${e.message}`; } showStatusMessage(elements.signupStatusMessage, m, 'danger'); } finally { showLoader(false); } }
         async function loginWithEmail() { if (!auth) return; const em = elements.loginEmailInput.value.trim(); const pw = elements.loginPasswordInput.value; if (!em || !pw) { showStatusMessage(elements.loginStatusMessage, 'Enter email & password.', 'warning'); return; } showLoader(true); clearStatusMessage(elements.loginStatusMessage); try { await signInWithEmailAndPassword(auth, em, pw); } catch (e) { console.error("Login Error:", e); let m = `Login failed.`; switch (e.code) { case 'auth/user-not-found': case 'auth/wrong-password': case 'auth/invalid-credential': m = 'Invalid email or password.'; break; case 'auth/invalid-email': m = 'Invalid email format.'; break; case 'auth/too-many-requests': m = 'Too many attempts. Reset pass or wait.'; break; case 'auth/network-request-failed': m = 'Network error.'; break; case 'auth/user-disabled': m = 'Account disabled.'; break; default: m = `Error: ${e.message}`; } showStatusMessage(elements.loginStatusMessage, m, 'danger'); } finally { showLoader(false); } }
         async function resetPassword() { if (!auth) return; const em = elements.loginEmailInput.value.trim(); if (!em) { showStatusMessage(elements.loginStatusMessage, 'Enter email for password reset.', 'warning'); return; } showLoader(true); clearStatusMessage(elements.loginStatusMessage); try { await sendPasswordResetEmail(auth, em); showStatusMessage(elements.loginStatusMessage, 'Password reset email sent! Check inbox/spam.', 'success', false); } catch (e) { console.error("Reset Pass Error:", e); let m = `Failed to send email.`; switch (e.code) { case 'auth/user-not-found': case 'auth/invalid-email': m = 'Email not found.'; break; case 'auth/network-request-failed': m = 'Network error.'; break; default: m = `Error: ${e.message}`; } showStatusMessage(elements.loginStatusMessage, m, 'danger'); } finally { showLoader(false); } }
@@ -1227,7 +1228,7 @@ const card = document.createElement('div');
                 if(t.status === 'ongoing' || t.status === 'upcoming') {
                     chatBtnHtml = `<button class="btn btn-custom btn-custom-secondary btn-sm btn-chat" data-tournament-id="${tId}" data-tournament-name="${t.name || 'Tournament'}"><i class="bi bi-chat-dots-fill"></i> Chat</button>`
                 }
-            } else if (canJ) {
+  } else if (canJ) {
                 const mode = t.mode || 'Solo';
                 const finalFee = (mode === 'Duo' ? eFee * 2 : eFee);
                 joinBtnHtml = `<button class="btn btn-custom btn-sm btn-custom-accent btn-join" data-tournament-id="${tId}" data-fee="${eFee}" data-mode="${mode}">NPR ${eFee} Join <i class="bi bi-arrow-right-short"></i></button>`;
@@ -1258,7 +1259,8 @@ card.innerHTML = `
                     </div>
                     ${idPassBtn}
                 </div>`;
-      const jBtn = card.querySelector('.btn-join'); if (jBtn) jBtn.addEventListener('click', handleJoinTournamentClick);
+        
+            const jBtn = card.querySelector('.btn-join'); if (jBtn) jBtn.addEventListener('click', handleJoinTournamentClick);
             const dBtn = card.querySelector('.btn-details'); if (dBtn) dBtn.addEventListener('click', handleMatchDetailsClick);
             const ipBtn = card.querySelector('.btn-idpass'); if (ipBtn) ipBtn.addEventListener('click', handleIdPasswordClick);
             const cBtn = card.querySelector('.btn-chat'); if (cBtn) cBtn.addEventListener('click', (e) => openTournamentChat(e.currentTarget.dataset.tournamentId, e.currentTarget.dataset.tournamentName));
@@ -1499,7 +1501,7 @@ async function loadLeaderboardData() {
                 showStatusMessage(elements.withdrawStatusMessage, `Min withdraw NPR ${minW}.`, 'warning'); 
                 return; 
             } 
-      if (amt > wc) { 
+            if (amt > wc) { 
                 showStatusMessage(elements.withdrawStatusMessage, 'Insufficient winning balance.', 'warning'); 
                 return; 
             } 
@@ -1607,7 +1609,8 @@ function detachAllDbListeners() { for (const k in dbListeners) { try { const { p
             
             // Reset screenshot
             resetScreenshotUpload();
-                  // Generate QR code based on payment method
+            
+            // Generate QR code based on payment method
             let qrCodeUrl = '';
             let detailsText = '';
             
@@ -1985,7 +1988,8 @@ function detachAllDbListeners() { for (const k in dbListeners) { try { const { p
             const whatsappUrl = `https://wa.me/${contactNumber}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
         }
- async function loadMatchHistory() {
+        
+        async function loadMatchHistory() {
             if (!currentUser || !elements.matchHistoryModalInstance) return;
             
             elements.matchHistoryBodyEl.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-accent"></div><p class="mt-2 text-secondary">Loading history...</p></div>';
@@ -2054,7 +2058,7 @@ elements.matchHistoryBodyEl.innerHTML = historyHtml;
                 }, { onlyOnce: false })
             };
         }
-        
+
         function cancelReply(){
             currentReply = null;
             elements.chatReplyContextEl.style.display = 'none';
@@ -2252,7 +2256,8 @@ document.body.addEventListener('click', (event) => { if (event.target.matches('.
                      onAuthStateChanged(auth, handleAuthStateChange);
                  });
          });
-               // <<< AUDIO LOGIC START >>>
+
+         // <<< AUDIO LOGIC START >>>
         function initializeAudio() {
             const backgroundMusic = document.getElementById('backgroundMusic');
             const clickSound = document.getElementById('clickSound');
