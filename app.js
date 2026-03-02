@@ -1114,7 +1114,8 @@ document.querySelectorAll('[data-admin-status]').forEach(btn => {
     });
 });
 
-        // ==================== WALLET ====================
+
+// ==================== WALLET ====================
 async function loadWalletData() {
     if (!appState.currentUser) return;
     updateAllWalletDisplays();
@@ -1314,7 +1315,8 @@ document.getElementById('saveGamingProfileBtn')?.addEventListener('click', async
     showToast('Gaming profile saved');
     bootstrap.Modal.getInstance(document.getElementById('gamingProfileModal')).hide();
 });
-  // ==================== COMPLAINT SYSTEM ====================
+
+// ==================== COMPLAINT SYSTEM ====================
 async function loadComplaintTournaments() {
     if (!appState.currentUser) return;
     const select = document.getElementById('complaintTournament');
@@ -1742,7 +1744,34 @@ function openChat(matchId) {
     currentChatMatchId = matchId;
     document.getElementById('chatTitle').textContent = `Match Chat - ${matchId}`;
     loadChatMessages(matchId);
-  });
+    new bootstrap.Modal(document.getElementById('chatModal')).show();
+}
+async function loadChatMessages(matchId) {
+    const snap = await db.ref(`chats/${matchId}`).orderByChild('timestamp').once('value');
+    const msgs = snap.val() || {};
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = '';
+    Object.values(msgs).forEach(m => {
+        const div = document.createElement('div');
+        div.className = `chat-message ${m.userId === appState.currentUser?.uid ? 'own' : ''}`;
+        div.innerHTML = `<strong>${m.userName}:</strong> ${m.text}<br><small>${formatDate(m.timestamp)}</small>`;
+        container.appendChild(div);
+    });
+    container.scrollTop = container.scrollHeight;
+}
+document.getElementById('sendChatBtn')?.addEventListener('click', async () => {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || !currentChatMatchId) return;
+    await db.ref(`chats/${currentChatMatchId}`).push({
+        userId: appState.currentUser.uid,
+        userName: appState.userProfile.displayName,
+        text,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+    input.value = '';
+    loadChatMessages(currentChatMatchId);
+});
 
 // ==================== NOTIFICATIONS ====================
 function requestNotificationPermission() {
@@ -1878,7 +1907,7 @@ function setupPasswordToggle(inputId, toggleId) {
             const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
             input.setAttribute('type', type);
             this.classList.toggle('bi-eye');
-            this.classList.toggle('bi-eye-slash');
+  this.classList.toggle('bi-eye-slash');
         });
     }
 }
@@ -2074,3 +2103,4 @@ new Swiper('#heroSlider', { loop: true, autoplay: { delay: 3000 }, pagination: {
 
 // ==================== REQUEST NOTIFICATION PERMISSION ====================
 requestNotificationPermission();
+    
