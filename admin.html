@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Adpro Tournament - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #0a0c14;
+            --secondary-bg: #151a24;
+            --card-bg: #1e2632;
+            --sidebar-bg: #0f1219;
+            --text-primary: #ffffff;
+            --text-secondary: #a0b3d9;
+            --accent-color: #ffd700;
+            --accent-gradient: linear-gradient(135deg, #ffd700, #ffaa00);
+            --primary-button-bg: #3b82f6;
+            --border-color: #2a3440;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .admin-header {
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 25px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            object-fit: cover;
+        }
+
+        .admin-badge {
+            background: var(--accent-gradient);
+            color: var(--primary-bg);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .admin-sidebar {
+            position: fixed;
+            top: 71px;
+            left: 0;
+            bottom: 0;
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-item {
+            padding: 12px 25px;
+            margin: 2px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-item i {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item.active {
+            background: var(--accent-gradient);
+            color: var(--primary-bg);
+            font-weight: 600;
+        }
+
+        .sidebar-item.active i {
+            color: var(--primary-bg);
+        }
+
+        .badge-count {
+            background: var(--danger-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-left: auto;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            margin-top: 71px;
+            padding: 25px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .table {
+            color: var(--text-primary);
+            margin-bottom: 0;
+            min-width: 600px;
+        }
+
+        .table th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom-color: var(--border-color);
+            padding: 15px 10px;
+        }
+
+        .table td {
+            padding: 15px 10px;
+            border-bottom-color: var(--border-color);
+            vertical-align: middle;
+        }
+
+        .table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning-color);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--warning-color);
+        }
+
+        .badge-approved {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--success-color);
+        }
+
+        .badge-rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--danger-color);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--info-color);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--info-color);
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-approve {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .btn-approve:hover {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-reject {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .btn-reject:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-view {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--info-color);
+            border: 1px solid var(--info-color);
+        }
+
+        .btn-view:hover {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .btn-ban {
+            background: rgba(147, 51, 234, 0.2);
+            color: #9333ea;
+            border: 1px solid #9333ea;
+        }
+
+        .btn-ban:hover {
+            background: #9333ea;
+            color: white;
+        }
+
+        .modal-content {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+        }
+
+        .modal-header {
+            border-bottom-color: var(--border-color);
+        }
+
+        .modal-footer {
+            border-top-color: var(--border-color);
+        }
+
+        .btn-close-white {
+            filter: invert(1);
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .nav-tabs {
+            border-bottom-color: var(--border-color);
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--text-secondary);
+            border: none;
+            padding: 10px 20px;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--text-primary);
+            border: none;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: transparent;
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .form-control, .form-select {
+            background: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 10px 15px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--primary-bg);
+            border-color: var(--accent-color);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(255,215,0,0.1);
+        }
+
+        .user-info-card {
+            background: var(--primary-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color);
+        }
+
+        .withdrawal-timeline {
+            background: var(--primary-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .timeline-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .timeline-dot.completed {
+            background: var(--success-color);
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-content small {
+            color: var(--text-secondary);
+            display: block;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--card-bg);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-left: 4px solid var(--success-color);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 70px;
+            }
+            .sidebar-item span:not(.badge-count) {
+                display: none;
+            }
+            .sidebar-item {
+                padding: 15px;
+                justify-content: center;
+            }
+            .sidebar-item i {
+                margin: 0;
+            }
+            .badge-count {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+            }
+            .main-content {
+                margin-left: 70px;
+                padding: 15px;
+            }
+            .admin-header {
+                padding: 10px;
+            }
+            .table-container {
+                padding: 10px;
+            }
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .info-item {
+            background: var(--primary-bg);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .tournament-image-preview {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 10px 0;
+        }
+        .upload-area:hover { border-color: var(--accent-color); background: rgba(250,204,21,0.1); }
+        .upload-area i { font-size: 2rem; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="login-container">
+        <div class="text-center mb-4">
+            <img src="https://i.ibb.co/4Z5hPVzp/20250418-150058.jpg" alt="Logo" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-color);">
+            <h3 class="mt-3 fw-bold">Admin Login</h3>
+            <p class="text-secondary">Access the control panel</p>
+        </div>
+
+        <form id="adminLoginForm">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="adminEmail" placeholder="admin@example.com" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" id="adminPassword" placeholder="••••••••" required>
+            </div>
+            <div id="loginStatus" class="alert" style="display: none;"></div>
+            <button type="submit" class="btn w-100" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600; padding: 12px; border: none;">Login to Dashboard</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <small class="text-secondary">Secure Admin Access Only</small>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <img src="https://i.ibb.co/4Z5hPVzp/20250418-150058.jpg" alt="Logo" class="header-logo">
+                <h5 class="mb-0">Adpro Tournament Admin</h5>
+                <span class="admin-badge" id="adminName">Admin</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-secondary" id="adminEmail"></span>
+                <button class="btn btn-sm btn-outline-danger" id="logoutBtn">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active" data-section="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="sidebar-item" data-section="withdrawals">
+                    <i class="bi bi-cash-coin"></i>
+                    <span>Withdrawals</span>
+                    <span class="badge-count" id="pendingWithdrawalsCount">0</span>
+                </li>
+                <li class="sidebar-item" data-section="deposits">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Deposits</span>
+                    <span class="badge-count" id="pendingDepositsCount">0</span>
+                </li>
+                <li class="sidebar-item" data-section="results">
+                    <i class="bi bi-check-circle"></i>
+                    <span>Results</span>
+                    <span class="badge-count" id="pendingResultsCount">0</span>
+                </li>
+                <li class="sidebar-item" data-section="reports">
+                    <i class="bi bi-flag"></i>
+                    <span>Reports</span>
+                    <span class="badge-count" id="pendingReportsCount">0</span>
+                </li>
+                <li class="sidebar-item" data-section="complaints">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span>Complaints</span>
+                    <span class="badge-count" id="pendingComplaintsCount">0</span>
+                </li>
+                <li class="sidebar-item" data-section="tournaments">
+                    <i class="bi bi-trophy"></i>
+                    <span>Tournaments</span>
+                </li>
+                <li class="sidebar-item" data-section="hosted">
+                    <i class="bi bi-joystick"></i>
+                    <span>Hosted Matches</span>
+                </li>
+                <li class="sidebar-item" data-section="users">
+                    <i class="bi bi-people"></i>
+                    <span>Users</span>
+                </li>
+                <li class="sidebar-item" data-section="adminTournament">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Admin Tournament</span>
+                </li>
+                <li class="sidebar-item" data-section="notifications">
+                    <i class="bi bi-bell"></i>
+                    <span>Notifications</span>
+                </li>
+                <li class="sidebar-item" data-section="settings">
+                    <i class="bi bi-gear"></i>
+                    <span>Settings</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="section active">
+                <h4 class="mb-4">Dashboard Overview</h4>
+    <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-people"></i></div>
+                            <div class="stat-value" id="totalUsers">0</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+                            <div class="stat-value" id="totalDeposits">NPR 0</div>
+                            <div class="stat-label">Total Deposits</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+                            <div class="stat-value" id="pendingWithdrawalsTotal">0</div>
+                            <div class="stat-label">Pending Withdrawals</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-trophy"></i></div>
+                            <div class="stat-value" id="activeTournaments">0</div>
+                            <div class="stat-label">Active Tournaments</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="table-container">
+                            <h5 class="mb-3">Recent Withdrawals</h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentWithdrawals">
+                                    <tr><td colspan="4" class="text-center">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="table-container">
+                            <h5 class="mb-3">Recent Reports</h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Reporter</th>
+                                        <th>Reported</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentReports">
+                                    <tr><td colspan="4" class="text-center">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+                      <!-- Withdrawals Section -->
+            <section id="withdrawalsSection" class="section">
+                <h4 class="mb-4">Withdrawal Requests</h4>
+                <ul class="nav nav-tabs mb-4" id="withdrawalTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#pendingWithdrawals">Pending</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#approvedWithdrawals">Approved</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#rejectedWithdrawals">Rejected</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="pendingWithdrawals">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Name/Phone</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Account</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingWithdrawalsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="approvedWithdrawals">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Name/Phone</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Processed</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="approvedWithdrawalsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="rejectedWithdrawals">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Name/Phone</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rejectedWithdrawalsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Deposits Section -->
+            <section id="depositsSection" class="section">
+                <h4 class="mb-4">Deposit Requests</h4>
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#pendingDeposits">Pending</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#approvedDeposits">Approved</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#rejectedDeposits">Rejected</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="pendingDeposits">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Screenshot</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingDepositsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="approvedDeposits">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Processed</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="approvedDepositsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="rejectedDeposits">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rejectedDepositsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="section">
+                <h4 class="mb-4">Result Submissions</h4>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Tournament</th>
+                                <th>Player</th>
+                                <th>Result</th>
+                                <th>Screenshot</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reportsSection" class="section">
+                <h4 class="mb-4">Player Reports</h4>
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#pendingReports">Pending</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#resolvedReports">Resolved</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="pendingReports">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Reporter</th>
+                                        <th>Reported</th>
+                                        <th>Evidence</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingReportsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="resolvedReports">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Reporter</th>
+                                        <th>Reported</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resolvedReportsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Complaints Section (updated for flat structure) -->
+            <section id="complaintsSection" class="section">
+                <h4 class="mb-4">User Complaints</h4>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Tournament ID</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Screenshot</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaintsTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Tournaments Section -->
+            <section id="tournamentsSection" class="section">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <h4>Manage Tournaments</h4>
+                    <button class="btn" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;" data-bs-toggle="modal" data-bs-target="#addTournamentModal">
+                        <i class="bi bi-plus-circle"></i> Add Tournament
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Game</th>
+                                <th>Entry</th>
+                                <th>Prize</th>
+                                <th>Players</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tournamentsTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Hosted Matches Section -->
+            <section id="hostedSection" class="section">
+                <h4 class="mb-4">User Hosted Matches</h4>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Host</th>
+                                <th>Room ID</th>
+                                <th>Type</th>
+                                <th>Fee</th>
+                                <th>Players</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hostedTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="usersSection" class="section">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <h4>User Management</h4>
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control" placeholder="Search users..." id="userSearch" style="width: 250px;">
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                            <i class="bi bi-person-plus"></i> Add User
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Deposit</th>
+                                <th>Winning</th>
+                                <th>Bonus</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin Tournament Section (original 48-player) -->
+            <section id="adminTournamentSection" class="section">
+                <h4 class="mb-4">Admin Tournament (Battle Royale)</h4>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-people"></i></div>
+                            <div class="stat-value" id="adminTournamentPlayers">0/48</div>
+                            <div class="stat-label">Registered Players</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+                            <div class="stat-value" id="adminTournamentPrize">NPR 0</div>
+                            <div class="stat-label">Prize Pool</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h5 class="mb-3">Tournament Settings</h5>
+                    <form id="adminTournamentForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Entry Fee (NPR)</label>
+                                <input type="number" class="form-control" id="adminTournamentEntry" value="50" min="10">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Room ID</label>
+                                <input type="text" class="form-control" id="adminTournamentRoomId" placeholder="Enter room ID" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Room Password</label>
+                                <input type="text" class="form-control" id="adminTournamentPassword" placeholder="Enter password" required>
+                   </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Time</label>
+                                <input type="datetime-local" class="form-control" id="adminTournamentStart" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;">Update Tournament</button>
+                    </form>
+                </div>
+
+                <div class="table-container mt-4">
+                    <h5 class="mb-3">Registered Players</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTournamentPlayersTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section id="notificationsSection" class="section">
+                <h4 class="mb-4">Send Notifications</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="table-container">
+                            <h5 class="mb-3">Send to All Users</h5>
+                            <form id="globalNotificationForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="globalNotifTitle" placeholder="e.g., Tournament Reminder" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Message</label>
+                                    <textarea class="form-control" id="globalNotifMessage" rows="3" placeholder="Write your message..." required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Link (optional)</label>
+                                    <input type="text" class="form-control" id="globalNotifLink" placeholder="e.g., /tournament/xyz">
+                                </div>
+                                <button type="submit" class="btn w-100" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;">Send to All Users</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="table-container">
+                            <h5 class="mb-3">Send to Tournament Players</h5>
+                            <form id="tournamentNotificationForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Tournament</label>
+                                    <select class="form-select" id="tournamentSelect" required>
+                                        <option value="">Choose tournament...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="tournamentNotifTitle" placeholder="e.g., Match Starting Soon" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Message</label>
+                                    <textarea class="form-control" id="tournamentNotifMessage" rows="3" placeholder="Write your message..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn w-100" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;">Send to Tournament Players</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container mt-4">
+                    <h5 class="mb-3">Recent Notifications</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Message</th>
+                                <th>Audience</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentNotificationsTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settingsSection" class="section">
+                <h4 class="mb-4">App Settings</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="table-container">
+                            <h5 class="mb-3">General Settings</h5>
+                            <form id="settingsForm">
+                                <div class="mb-3">
+                                    <label class="form-label">App Name</label>
+                                    <input type="text" class="form-control" id="appName" value="Adpro Tournament">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Min Withdrawal (NPR)</label>
+                                    <input type="number" class="form-control" id="minWithdraw" value="40">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Signup Bonus (NPR)</label>
+                                    <input type="number" class="form-control" id="signupBonus" value="5">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Referral Bonus (NPR)</label>
+                                    <input type="number" class="form-control" id="referralBonus" value="10">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Support Contact</label>
+                                    <input type="text" class="form-control" id="supportContact" value="+977-9800000000">
+                                </div>
+                                <button type="submit" class="btn w-100" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;">Save Settings</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="table-container">
+                            <h5 class="mb-3">Payment Details</h5>
+                            <form id="paymentSettingsForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Bank Name</label>
+                                    <input type="text" class="form-control" id="bankName" value="Nepal Bank">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Account Number</label>
+                                    <input type="text" class="form-control" id="accountNo" value="1234567890">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Account Holder</label>
+                                    <input type="text" class="form-control" id="accountHolder" value="Adpro Tournament">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">eSewa ID</label>
+                                    <input type="text" class="form-control" id="esewaId" value="9800000000">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Payment Note</label>
+                                    <textarea class="form-control" id="paymentNote" rows="2">Withdrawals processed daily at 10:00 PM</textarea>
+                                </div>
+                                <button type="submit" class="btn w-100" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;">Save Payment Details</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Edit User Balance Modal -->
+    <div class="modal fade" id="editUserBalanceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User Balance</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editBalanceForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label class="form-label">Deposit Balance</label>
+                            <input type="number" class="form-control" id="editDeposit" min="0" step="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Winning Cash</label>
+                            <input type="number" class="form-control" id="editWinning" min="0" step="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Bonus Cash</label>
+                            <input type="number" class="form-control" id="editBonus" min="0" step="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason / Note (optional)</label>
+                            <input type="text" class="form-control" id="editReason" placeholder="e.g., Manual adjustment">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;" id="saveBalanceBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Action Modal -->
+    <div class="modal fade" id="withdrawalActionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Process Withdrawal</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="user-info-card" id="withdrawalUserInfo">
+                        <!-- User info will be populated here -->
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Amount</div>
+                            <div class="info-value" id="withdrawalAmount">NPR 0</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Method</div>
+                            <div class="info-value" id="withdrawalMethod">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Account</div>
+                            <div class="info-value" id="withdrawalAccount">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Phone</div>
+                            <div class="info-value" id="withdrawalPhone">-</div>
+                        </div>
+                    </div>
+
+                    <div class="withdrawal-timeline mt-3">
+                        <div class="timeline-item">
+                            <div class="timeline-dot completed"></div>
+                            <div class="timeline-content">
+                                <strong>Request Submitted</strong>
+                                <small id="withdrawalRequestTime">-</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <strong>Under Review</strong>
+                                <small>Admin verification</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <strong>Payment Processing</strong>
+                                <small>Will be sent by 10:00 PM</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="rejectReasonDiv" style="display: none;">
+                        <label class="form-label">Rejection Reason</label>
+                        <textarea class="form-control" id="rejectReason" rows="2" placeholder="Enter reason for rejection"></textarea>
+                    </div>
+
+                    <div class="mb-3" id="approveNoteDiv">
+                        <label class="form-label">Transaction ID / Note (Optional)</label>
+                        <input type="text" class="form-control" id="approveNote" placeholder="Enter transaction ID or note">
+                    </div>
+
+                    <div id="withdrawalActionStatus" class="alert" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="rejectWithdrawalBtn">Reject</button>
+                    <button type="button" class="btn btn-success" id="approveWithdrawalBtn">Approve & Mark Paid</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Tournament Modal -->
+    <div class="modal fade" id="addTournamentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Tournament</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addTournamentForm">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Tournament Image</label>
+                                <div class="upload-area" id="adminTournamentImageUploadArea">
+                                    <i class="bi bi-image"></i>
+                                    <p>Click to upload tournament image</p>
+                                    <input type="file" id="adminTournamentImageInput" accept="image/*" style="display: none;">
+                                </div>
+                                <div id="adminTournamentImagePreviewContainer" style="display: none;" class="text-center">
+                                    <img src="" alt="Preview" class="preview-image" id="adminTournamentImagePreview">
+                                    <button type="button" class="btn btn-sm btn-danger mt-2" id="removeAdminTournamentImageBtn">Remove</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tournament Name</label>
+                                <input type="text" class="form-control" id="tournamentName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Game</label>
+                                <select class="form-select" id="tournamentGame">
+                                    <option value="freefire">Free Fire</option>
+                                    <option value="pubg">PUBG Mobile</option>
+                                    <option value="cod">COD Mobile</option>
+                                    <option value="mobilelegend">Mobile Legend</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Entry Fee (NPR)</label>
+                                <input type="number" class="form-control" id="tournamentEntry" min="0" value="10">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Prize Pool (NPR)</label>
+                                <input type="number" class="form-control" id="tournamentPrize" min="0" value="100">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Max Players</label>
+                                <input type="number" class="form-control" id="tournamentMax" min="2" value="50">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mode</label>
+                                <select class="form-select" id="tournamentMode">
+                                    <option value="Solo">Solo</option>
+                                    <option value="Duo">Duo</option>
+                                    <option value="Squad">Squad</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Start Time</label>
+                                <input type="datetime-local" class="form-control" id="tournamentStart" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" id="tournamentDesc" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;" id="saveTournamentBtn">Save Tournament</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="newUserName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="newUserEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="newUserPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="newUserPhone" placeholder="Optional">
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <label class="form-label">Deposit</label>
+                                <input type="number" class="form-control" id="newUserDeposit" value="0" min="0">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">Winning</label>
+                                <input type="number" class="form-control" id="newUserWinning" value="0" min="0">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">Bonus</label>
+                                <input type="number" class="form-control" id="newUserBonus" value="0" min="0">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn" style="background: var(--accent-gradient); color: var(--primary-bg); font-weight: 600;" id="saveUserBtn">Create User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screenshot Modal -->
+    <div class="modal fade" id="screenshotModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Screenshot Evidence</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+         <div class="modal-body text-center">
+                    <img src="" alt="Screenshot" class="img-fluid" id="screenshotView" style="max-height: 500px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBD6BKSx3JJuU6s4BnB3tfb-lokMgAovDQ",
+            authDomain: "free-fire-85936.firebaseapp.com",
+            databaseURL: "https://free-fire-85936-default-rtdb.firebaseio.com",
+            projectId: "free-fire-85936",
+            storageBucket: "free-fire-85936.firebasestorage.app",
+            messagingSenderId: "355177631012",
+            appId: "1:355177631012:web:73046da88963213508b7b1"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Admin UID
+        let ADMIN_UID = null;
+        let currentAdmin = null;
+        let currentWithdrawalId = null;
+        let tournamentImageBase64 = null;
+
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const loginStatus = document.getElementById('loginStatus');
+        const toast = document.getElementById('toast');
+        const loader = document.getElementById('loader');
+
+        // Helper Functions
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.style.borderLeftColor = type === 'success' ? 'var(--success-color)' : 'var(--danger-color)';
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function showLoader() {
+            loader.style.display = 'flex';
+        }
+
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatCurrency(amount) {
+            return 'NPR ' + (amount || 0).toFixed(2);
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId + 'Section').classList.add('active');
+            
+            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`.sidebar-item[data-section="${sectionId}"]`).classList.add('active');
+            
+            // Load section data
+            switch(sectionId) {
+                case 'dashboard': loadDashboard(); break;
+                case 'withdrawals': loadWithdrawals(); break;
+                case 'deposits': loadDeposits(); break;
+                case 'results': loadResults(); break;
+                case 'reports': loadReports(); break;
+                case 'complaints': loadComplaints(); break;
+                case 'tournaments': loadTournaments(); break;
+                case 'hosted': loadHosted(); break;
+                case 'users': loadUsers(); break;
+                case 'adminTournament': loadAdminTournament(); break;
+                case 'notifications': loadNotifications(); loadTournamentSelect(); break;
+                default: break;
+            }
+        }
+
+        // Login
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            showLoader();
+            loginStatus.style.display = 'none';
+
+            try {
+                const result = await auth.signInWithEmailAndPassword(email, password);
+                const user = result.user;
+                
+                const adminRef = await db.ref('adminConfig').once('value');
+                const adminData = adminRef.val();
+                
+                if (adminData && adminData.adminUid === user.uid) {
+                    currentAdmin = user;
+                    ADMIN_UID = user.uid;
+                    loginSection.style.display = 'none';
+                    adminDashboard.style.display = 'block';
+                    document.getElementById('adminName').textContent = user.email?.split('@')[0] || 'Admin';
+                    document.getElementById('adminEmail').textContent = user.email;
+                    hideLoader();
+                    loadDashboard();
+                } else {
+                    if (confirm('No admin configured. Make this user the admin?')) {
+                        await db.ref('adminConfig').set({
+                            adminUid: user.uid,
+                            setupComplete: true,
+                            createdAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                        currentAdmin = user;
+                        ADMIN_UID = user.uid;
+                        loginSection.style.display = 'none';
+                        adminDashboard.style.display = 'block';
+                        document.getElementById('adminName').textContent = user.email?.split('@')[0] || 'Admin';
+                        document.getElementById('adminEmail').textContent = user.email;
+                        hideLoader();
+                        loadDashboard();
+                    } else {
+                        await auth.signOut();
+                        hideLoader();
+                        showToast('Access denied', 'error');
+                    }
+                }
+            } catch (error) {
+                hideLoader();
+                loginStatus.textContent = error.message;
+                loginStatus.className = 'alert alert-danger';
+                loginStatus.style.display = 'block';
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await auth.signOut();
+            loginSection.style.display = 'block';
+            adminDashboard.style.display = 'none';
+            currentAdmin = null;
+        });
+
+        // Sidebar Navigation
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', () => {
+                showSection(item.dataset.section);
+            });
+        });
+      
+  // Dashboard
+        async function loadDashboard() {
+            try {
+                const usersSnap = await db.ref('users').once('value');
+                const users = usersSnap.val() || {};
+                document.getElementById('totalUsers').textContent = Object.keys(users).length;
+
+                const depositsSnap = await db.ref('deposits').orderByChild('status').equalTo('approved').once('value');
+                const deposits = depositsSnap.val() || {};
+                const totalDeposits = Object.values(deposits).reduce((sum, d) => sum + (d.amount || 0), 0);
+                document.getElementById('totalDeposits').textContent = formatCurrency(totalDeposits);
+
+                const withdrawalsSnap = await db.ref('withdrawals').orderByChild('status').equalTo('pending').once('value');
+                const withdrawals = withdrawalsSnap.val() || {};
+                document.getElementById('pendingWithdrawalsTotal').textContent = Object.keys(withdrawals).length;
+
+                const tournamentsSnap = await db.ref('tournaments').orderByChild('status').equalTo('ongoing').once('value');
+                const tournaments = tournamentsSnap.val() || {};
+                document.getElementById('activeTournaments').textContent = Object.keys(tournaments).length;
+
+                // Recent Withdrawals
+                const recentWithdrawals = await db.ref('withdrawals').orderByChild('timestamp').limitToLast(5).once('value');
+                let withdrawalsHtml = '';
+                if (recentWithdrawals.exists()) {
+                    recentWithdrawals.forEach(child => {
+                        const w = child.val();
+                        withdrawalsHtml += `<tr>
+                            <td>${w.userName || w.userId?.substring(0, 8)}</td>
+                            <td>${formatCurrency(w.amount)}</td>
+                            <td>${w.method || 'N/A'}</td>
+                            <td><span class="badge-${w.status}">${w.status}</span></td>
+                        </tr>`;
+                    });
+                }
+                document.getElementById('recentWithdrawals').innerHTML = withdrawalsHtml || '<tr><td colspan="4" class="text-center">No withdrawals</td></tr>';
+
+                // Recent Reports
+                const recentReports = await db.ref('reports').orderByChild('timestamp').limitToLast(5).once('value');
+                let reportsHtml = '';
+                if (recentReports.exists()) {
+                    recentReports.forEach(child => {
+                        const r = child.val();
+                        reportsHtml += `<tr>
+                            <td>${r.type}</td>
+                            <td>${r.reporterName || r.reporterUid?.substring(0, 8)}</td>
+                            <td>${r.reportedUid?.substring(0, 8)}</td>
+                            <td><span class="badge-${r.status}">${r.status}</span></td>
+                        </tr>`;
+                    });
+                }
+                document.getElementById('recentReports').innerHTML = reportsHtml || '<tr><td colspan="4" class="text-center">No reports</td></tr>';
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Withdrawals
+        async function loadWithdrawals() {
+            try {
+                const pendingSnap = await db.ref('withdrawals').orderByChild('status').equalTo('pending').once('value');
+                const pending = pendingSnap.val() || {};
+                document.getElementById('pendingWithdrawalsCount').textContent = Object.keys(pending).length;
+
+                let pendingHtml = '';
+                Object.entries(pending).forEach(([key, w]) => {
+                    pendingHtml += `<tr>
+                        <td>${formatDate(w.timestamp)}</td>
+                        <td>
+                            <div>${w.userName || 'User'}</div>
+                            <small class="text-secondary">${w.userEmail || ''}</small>
+                        </td>
+                        <td>
+                            <div>${w.fullName || 'N/A'}</div>
+                            <small class="text-secondary">${w.phone || ''}</small>
+                        </td>
+                        <td>${formatCurrency(w.amount)}</td>
+                        <td>${w.method || 'N/A'}</td>
+                        <td>${w.accountDetails || 'N/A'}</td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewWithdrawal('${key}')" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-btn btn-approve" onclick="approveWithdrawal('${key}')" title="Approve">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button class="action-btn btn-reject" onclick="rejectWithdrawal('${key}')" title="Reject">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById('pendingWithdrawalsTable').innerHTML = pendingHtml || '<tr><td colspan="7" class="text-center">No pending withdrawals</td></tr>';
+                // Approved
+                const approvedSnap = await db.ref('withdrawals').orderByChild('status').equalTo('approved').once('value');
+                const approved = approvedSnap.val() || {};
+                let approvedHtml = '';
+                Object.entries(approved).forEach(([key, w]) => {
+                    approvedHtml += `<tr>
+                        <td>${formatDate(w.timestamp)}</td>
+                        <td>${w.userName || w.userId?.substring(0, 8)}</td>
+                        <td>${w.fullName || ''} / ${w.phone || ''}</td>
+                        <td>${formatCurrency(w.amount)}</td>
+                        <td>${w.method}</td>
+                        <td>${formatDate(w.processedAt)}</td>
+                    </tr>`;
+                });
+                document.getElementById('approvedWithdrawalsTable').innerHTML = approvedHtml || '<tr><td colspan="6" class="text-center">No approved withdrawals</td></tr>';
+
+                 // Rejected
+                const rejectedSnap = await db.ref('withdrawals').orderByChild('status').equalTo('rejected').once('value');
+                const rejected = rejectedSnap.val() || {};
+                let rejectedHtml = '';
+                Object.entries(rejected).forEach(([key, w]) => {
+                    rejectedHtml += `<tr>
+                        <td>${formatDate(w.timestamp)}</td>
+                        <td>${w.userName || w.userId?.substring(0, 8)}</td>
+                        <td>${w.fullName || ''} / ${w.phone || ''}</td>
+                        <td>${formatCurrency(w.amount)}</td>
+                        <td>${w.method}</td>
+                        <td>${w.rejectReason || 'N/A'}</td>
+                    </tr>`;
+                });
+                document.getElementById('rejectedWithdrawalsTable').innerHTML = rejectedHtml || '<tr><td colspan="6" class="text-center">No rejected withdrawals</td></tr>';
+            } catch (error) {
+                console.error('Error loading withdrawals:', error);
+            }
+        }
+
+        // View Withdrawal Details
+        window.viewWithdrawal = async (withdrawalId) => {
+            try {
+                const snap = await db.ref(`withdrawals/${withdrawalId}`).once('value');
+                const w = snap.val();
+                
+                document.getElementById('withdrawalAmount').textContent = formatCurrency(w.amount);
+                document.getElementById('withdrawalMethod').textContent = w.method;
+                document.getElementById('withdrawalAccount').textContent = w.accountDetails;
+                document.getElementById('withdrawalPhone').textContent = w.phone || 'N/A';
+                document.getElementById('withdrawalRequestTime').textContent = formatDate(w.timestamp);
+                
+                document.getElementById('withdrawalUserInfo').innerHTML = `
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(w.fullName || w.userName || 'User')}&background=ffd700&color=000&size=50" class="user-avatar">
+                        <div>
+                            <h6 class="mb-1">${w.fullName || w.userName || 'User'}</h6>
+                            <small class="text-secondary">${w.userEmail || ''}</small>
+                        </div>
+                    </div>
+                `;
+                
+                currentWithdrawalId = withdrawalId;
+                document.getElementById('rejectReason').value = '';
+                document.getElementById('approveNote').value = '';
+                document.getElementById('rejectReasonDiv').style.display = 'none';
+                document.getElementById('approveNoteDiv').style.display = 'block';
+                
+                new bootstrap.Modal(document.getElementById('withdrawalActionModal')).show();
+            } catch (error) {
+                console.error('Error viewing withdrawal:', error);
+            }
+        };
+        // Approve Withdrawal
+        window.approveWithdrawal = async (withdrawalId) => {
+            if (!confirm('Mark this withdrawal as paid?')) return;
+            
+            const note = document.getElementById('approveNote')?.value || 'Paid';
+            showLoader();
+            
+            try {
+                await db.ref(`withdrawals/${withdrawalId}`).update({
+                    status: 'approved',
+                    processedAt: firebase.database.ServerValue.TIMESTAMP,
+                    adminNote: note,
+                    processedBy: currentAdmin?.uid
+                });
+                
+                showToast('Withdrawal marked as paid');
+                bootstrap.Modal.getInstance(document.getElementById('withdrawalActionModal'))?.hide();
+                loadWithdrawals();
+                loadDashboard();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        };
+
+        // Reject Withdrawal
+        window.rejectWithdrawal = async (withdrawalId) => {
+            const reason = prompt('Enter rejection reason:');
+            if (!reason) return;
+            
+            showLoader();
+            
+            try {
+                const snap = await db.ref(`withdrawals/${withdrawalId}`).once('value');
+                const w = snap.val();
+                
+                const userSnap = await db.ref(`users/${w.userId}`).once('value');
+                const user = userSnap.val();
+                
+                const updates = {};
+                updates[`withdrawals/${withdrawalId}/status`] = 'rejected';
+                updates[`withdrawals/${withdrawalId}/rejectReason`] = reason;
+                updates[`withdrawals/${withdrawalId}/processedAt`] = firebase.database.ServerValue.TIMESTAMP;
+                
+                updates[`users/${w.userId}/winningCash`] = (user.winningCash || 0) + w.amount;
+                
+                const txKey = db.ref(`transactions/${w.userId}`).push().key;
+                updates[`transactions/${w.userId}/${txKey}`] = {
+                    type: 'withdrawal_refund',
+                    amount: w.amount,
+                    description: 'Withdrawal rejected - Amount refunded',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                await db.ref().update(updates);
+                
+                showToast('Withdrawal rejected and refunded');
+                bootstrap.Modal.getInstance(document.getElementById('withdrawalActionModal'))?.hide();
+                loadWithdrawals();
+                loadDashboard();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        };
+
+        document.getElementById('approveWithdrawalBtn').addEventListener('click', () => {
+            if (currentWithdrawalId) approveWithdrawal(currentWithdrawalId);
+        });
+
+        document.getElementById('rejectWithdrawalBtn').addEventListener('click', () => {
+            if (currentWithdrawalId) rejectWithdrawal(currentWithdrawalId);
+        });
+
+        // Deposits
+        async function loadDeposits() {
+            try {
+                const pendingSnap = await db.ref('deposits').orderByChild('status').equalTo('pending').once('value');
+                const pending = pendingSnap.val() || {};
+                document.getElementById('pendingDepositsCount').textContent = Object.keys(pending).length;
+
+                let pendingHtml = '';
+                Object.entries(pending).forEach(([key, d]) => {
+                    pendingHtml += `<tr>
+                        <td>${formatDate(d.timestamp)}</td>
+                        <td>${d.userName || d.userEmail || d.userId}</td>
+                        <td>${formatCurrency(d.amount)}</td>
+                        <td>${d.paymentMethod || 'N/A'}</td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewScreenshot('${d.screenshot}')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <button class="action-btn btn-approve" onclick="approveDeposit('${key}', '${d.userId}', ${d.amount})">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button class="action-btn btn-reject" onclick="rejectDeposit('${key}')">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById('pendingDepositsTable').innerHTML = pendingHtml || '<tr><td colspan="6" class="text-center">No pending deposits</td></tr>';
+
+                const approvedSnap = await db.ref('deposits').orderByChild('status').equalTo('approved').once('value');
+                const approved = approvedSnap.val() || {};
+                let approvedHtml = '';
+                Object.entries(approved).forEach(([key, d]) => {
+                    approvedHtml += `<tr>
+                        <td>${formatDate(d.timestamp)}</td>
+                        <td>${d.userName || d.userEmail}</td>
+                        <td>${formatCurrency(d.amount)}</td>
+                        <td>${d.paymentMethod}</td>
+                        <td>${formatDate(d.processedAt)}</td>
+                    </tr>`;
+                });
+                document.getElementById('approvedDepositsTable').innerHTML = approvedHtml || '<tr><td colspan="5" class="text-center">No approved deposits</td></tr>';
+
+                const rejectedSnap = await db.ref('deposits').orderByChild('status').equalTo('rejected').once('value');
+                const rejected = rejectedSnap.val() || {};
+                let rejectedHtml = '';
+                Object.entries(rejected).forEach(([key, d]) => {
+                    rejectedHtml += `<tr>
+                        <td>${formatDate(d.timestamp)}</td>
+                        <td>${d.userName || d.userEmail}</td>
+                        <td>${formatCurrency(d.amount)}</td>
+                        <td>${d.paymentMethod}</td>
+                        <td>${d.rejectReason || 'N/A'}</td>
+                    </tr>`;
+                });
+                document.getElementById('rejectedDepositsTable').innerHTML = rejectedHtml || '<tr><td colspan="5" class="text-center">No rejected deposits</td></tr>';
+            } catch (error) {
+                console.error('Error loading deposits:', error);
+            }
+        }
+
+        window.approveDeposit = async (depositId, userId, amount) => {
+            if (!confirm('Approve this deposit?')) return;
+            showLoader();
+
+            try {
+                const userSnap = await db.ref(`users/${userId}`).once('value');
+                const user = userSnap.val();
+                
+                const updates = {};
+                updates[`deposits/${depositId}/status`] = 'approved';
+                updates[`deposits/${depositId}/processedAt`] = firebase.database.ServerValue.TIMESTAMP;
+                
+                updates[`users/${userId}/depositBalance`] = (user.depositBalance || 0) + amount;
+                
+                const txKey = db.ref(`transactions/${userId}`).push().key;
+                updates[`transactions/${userId}/${txKey}`] = {
+                    type: 'deposit',
+                    amount: amount,
+                    description: 'Deposit approved',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                await db.ref().update(updates);
+                showToast('Deposit approved');
+                loadDeposits();
+                loadDashboard();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        };
+
+        window.rejectDeposit = async (depositId) => {
+            const reason = prompt('Enter rejection reason:');
+            if (!reason) return;
+            showLoader();
+
+            try {
+                await db.ref(`deposits/${depositId}`).update({
+                    status: 'rejected',
+                    rejectReason: reason,
+                    processedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                showToast('Deposit rejected');
+                loadDeposits();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        };
+          // Save Tournament
+        document.getElementById('saveTournamentBtn').addEventListener('click', async () => {
+            const tournament = {
+                name: document.getElementById('tournamentName').value,
+                gameId: document.getElementById('tournamentGame').value,
+                entryFee: parseInt(document.getElementById('tournamentEntry').value),
+                prizePool: parseInt(document.getElementById('tournamentPrize').value),
+                maxPlayers: parseInt(document.getElementById('tournamentMax').value),
+                mode: document.getElementById('tournamentMode').value,
+                startTime: new Date(document.getElementById('tournamentStart').value).getTime(),
+                description: document.getElementById('tournamentDesc').value,
+                status: 'upcoming',
+                registeredPlayers: {},
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                hostId: 'admin',
+                isAdminTournament: true
+            };
+            
+            if (tournamentImageBase64) {
+                tournament.imageUrl = tournamentImageBase64;
+            }
+
+            showLoader();
+            try {
+                await db.ref('tournaments').push(tournament);
+                showToast('Tournament created!');
+                tournamentImageBase64 = null;
+                document.getElementById('adminTournamentImagePreviewContainer').style.display = 'none';
+                document.getElementById('adminTournamentImageUploadArea').style.display = 'block';
+                bootstrap.Modal.getInstance(document.getElementById('addTournamentModal')).hide();
+                document.getElementById('addTournamentForm').reset();
+                loadTournaments();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Tournaments
+        async function loadTournaments() {
+            try {
+                const snap = await db.ref('tournaments').once('value');
+                const tournaments = snap.val() || {};
+                
+                let html = '';
+                Object.entries(tournaments).forEach(([key, t]) => {
+                    const players = t.registeredPlayers ? Object.keys(t.registeredPlayers).length : 0;
+                    html += `<tr>
+                        <td>
+                            ${t.imageUrl ? `<img src="${t.imageUrl}" class="tournament-image-preview" onerror="this.src='https://via.placeholder.com/50x50/1e2632/ffd700?text=T'">` : 'No Image'}
+                        </td>
+                        <td>${t.name}</td>
+                        <td>${t.gameId}</td>
+                        <td>${formatCurrency(t.entryFee)}</td>
+                        <td>${formatCurrency(t.prizePool)}</td>
+                        <td>${players}/${t.maxPlayers || '∞'}</td>
+                        <td><span class="badge-${t.status}">${t.status}</span></td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="editTournament('${key}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-btn btn-danger" onclick="deleteTournament('${key}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById('tournamentsTable').innerHTML = html || '<tr><td colspan="8" class="text-center">No tournaments</td></tr>';
+            } catch (error) {
+                console.error('Error loading tournaments:', error);
+            }
+        }
+
+        // Delete Tournament
+        window.deleteTournament = async (tournamentId) => {
+            if (!confirm('Delete this tournament? This action cannot be undone.')) return;
+            showLoader();
+            try {
+                await db.ref(`tournaments/${tournamentId}`).remove();
+                showToast('Tournament deleted');
+                loadTournaments();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        };
+
+        // Edit Tournament (placeholder)
+        window.editTournament = (tournamentId) => {
+            alert('Edit functionality - Implement as needed');
+        };
+
+        // Hosted Matches
+        async function loadHosted() {
+            try {
+                const snap = await db.ref('tournaments').once('value');
+                const tournaments = snap.val() || {};
+                
+                let html = '';
+                Object.entries(tournaments).forEach(([key, t]) => {
+                    if (t.hostId && t.hostId !== 'admin') {
+                        const players = t.registeredPlayers ? Object.keys(t.registeredPlayers).length : 0;
+                        html += `<tr>
+                            <td>${formatDate(t.createdAt)}</td>
+                            <td>${t.hostName || t.hostId?.substring(0, 8)}</td>
+                            <td>${t.roomId || 'N/A'}</td>
+                            <td>${t.mode || 'Solo'}</td>
+                            <td>${formatCurrency(t.entryFee)}</td>
+                            <td>${players}</td>
+                            <td><span class="badge-${t.status}">${t.status}</span></td>
+                            <td>
+                                <button class="action-btn btn-view" onclick="showRoomDetails('${t.roomId}', '${t.roomPassword}')">
+                                    <i class="bi bi-key"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                    }
+                });
+                document.getElementById('hostedTable').innerHTML = html || '<tr><td colspan="8" class="text-center">No hosted matches</td></tr>';
+            } catch (error) {
+                console.error('Error loading hosted matches:', error);
+            }
+        }
+
+        window.showRoomDetails = (roomId, password) => {
+            alert(`Room ID: ${roomId}\nPassword: ${password}`);
+        };
+
+        // Users
+        async function loadUsers() {
+            try {
+                const snap = await db.ref('users').once('value');
+                const users = snap.val() || {};
+                
+                let html = '';
+                Object.entries(users).forEach(([key, u]) => {
+                    const total = (u.depositBalance || 0) + (u.winningCash || 0) + (u.bonusCash || 0);
+                    html += `<tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.displayName || 'User')}&background=ffd700&color=000&size=30" class="user-avatar" style="width: 30px; height: 30px;">
+                                <div>
+                                    <div>${u.displayName || 'N/A'}</div>
+                                    <small class="text-secondary">${u.uid?.substring(0, 8)}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${u.email || 'N/A'}</td>
+                        <td>${formatCurrency(u.depositBalance || 0)}</td>
+                        <td>${formatCurrency(u.winningCash || 0)}</td>
+                        <td>${formatCurrency(u.bonusCash || 0)}</td>
+                        <td>${formatCurrency(total)}</td>
+                        <td><span class="badge-${u.status || 'active'}">${u.status || 'active'}</span></td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="editUserBalance('${key}', ${u.depositBalance || 0}, ${u.winningCash || 0}, ${u.bonusCash || 0})">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="action-btn ${u.status === 'banned' ? 'btn-approve' : 'btn-ban'}" onclick="toggleUserStatus('${key}', '${u.status || 'active'}')">
+                                <i class="bi bi-${u.status === 'banned' ? 'check-circle' : 'ban'}"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById('usersTable').innerHTML = html || '<tr><td colspan="8" class="text-center">No users</td></tr>';
+
+                // Search
+                const searchInput = document.getElementById('userSearch');
+                if (searchInput) {
+                    searchInput.removeEventListener('input', window.userSearchHandler);
+                    window.userSearchHandler = (e) => {
+                        const search = e.target.value.toLowerCase();
+                        document.querySelectorAll('#usersTable tr').forEach(row => {
+                            const text = row.textContent.toLowerCase();
+                            row.style.display = text.includes(search) ? '' : 'none';
+                        });
+                    };
+                    searchInput.addEventListener('input', window.userSearchHandler);
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        // Edit User Balance
+        window.editUserBalance = (userId, deposit, winning, bonus) => {
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editDeposit').value = deposit;
+            document.getElementById('editWinning').value = winning;
+            document.getElementById('editBonus').value = bonus;
+            document.getElementById('editReason').value = '';
+            new bootstrap.Modal(document.getElementById('editUserBalanceModal')).show();
+        };
+
+        // Save Balance Changes
+        document.getElementById('saveBalanceBtn').addEventListener('click', async () => {
+            const userId = document.getElementById('editUserId').value;
+            const newDeposit = parseInt(document.getElementById('editDeposit').value) || 0;
+            const newWinning = parseInt(document.getElementById('editWinning').value) || 0;
+            const newBonus = parseInt(document.getElementById('editBonus').value) || 0;
+            const reason = document.getElementById('editReason').value || 'Manual adjustment';
+
+            if (!userId) return;
+
+            showLoader();
+            try {
+                const userSnap = await db.ref(`users/${userId}`).once('value');
+                const user = userSnap.val();
+                
+                const updates = {};
+                updates[`users/${userId}/depositBalance`] = newDeposit;
+                updates[`users/${userId}/winningCash`] = newWinning;
+                updates[`users/${userId}/bonusCash`] = newBonus;
+
+                const txKey = db.ref(`transactions/${userId}`).push().key;
+                updates[`transactions/${userId}/${txKey}`] = {
+                    type: 'admin_adjustment',
+                    amount: 0,
+                    description: `Admin balance adjustment: Deposit ${newDeposit - (user.depositBalance||0)}, Winning ${newWinning - (user.winningCash||0)}, Bonus ${newBonus - (user.bonusCash||0)} - ${reason}`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    admin: currentAdmin?.uid
+                };
+
+                await db.ref().update(updates);
+                showToast('User balance updated');
+                bootstrap.Modal.getInstance(document.getElementById('editUserBalanceModal')).hide();
+                loadUsers();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Toggle User Status
+        window.toggleUserStatus = async (userId, currentStatus) => {
+            const newStatus = currentStatus === 'active' ? 'banned' : 'active';
+            if (!confirm(`${newStatus === 'banned' ? 'Ban' : 'Activate'} this user?`)) return;
+            showLoader();
+            try {
+                await db.ref(`users/${userId}/status`).set(newStatus);
+                showToast(`User ${newStatus}`);
+                loadUsers();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        };
+
+        // Save New User
+        document.getElementById('saveUserBtn').addEventListener('click', async () => {
+            const name = document.getElementById('newUserName').value;
+            const email = document.getElementById('newUserEmail').value;
+            const password = document.getElementById('newUserPassword').value;
+            const phone = document.getElementById('newUserPhone').value;
+            const deposit = parseInt(document.getElementById('newUserDeposit').value) || 0;
+            const winning = parseInt(document.getElementById('newUserWinning').value) || 0;
+            const bonus = parseInt(document.getElementById('newUserBonus').value) || 0;
+
+            showLoader();
+            try {
+                const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const uid = result.user.uid;
+                const referralCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+                await db.ref(`users/${uid}`).set({
+                    uid: uid,
+                    displayName: name,
+                    email: email,
+                    phone: phone,
+                    depositBalance: deposit,
+                    winningCash: winning,
+                    bonusCash: bonus,
+                    referralCode: referralCode,
+                    status: 'active',
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                    photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ffd700&color=000&size=80&bold=true`
+                });
+
+                showToast('User created successfully!');
+                bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+                document.getElementById('addUserForm').reset();
+                loadUsers();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+       // Admin Tournament (original 48-player)
+        async function loadAdminTournament() {
+            try {
+                const snap = await db.ref('adminTournament').once('value');
+                const tournament = snap.val() || {};
+                const players = tournament.players || {};
+                const count = Object.keys(players).length;
+                const entryFee = tournament.entryFee || 50;
+
+                document.getElementById('adminTournamentPlayers').textContent = `${count}/48`;
+                document.getElementById('adminTournamentPrize').textContent = formatCurrency(count * entryFee);
+
+                document.getElementById('adminTournamentEntry').value = entryFee;
+                document.getElementById('adminTournamentRoomId').value = tournament.roomId || '';
+                document.getElementById('adminTournamentPassword').value = tournament.roomPassword || '';
+                if (tournament.startTime) {
+                    const d = new Date(tournament.startTime);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const hours = String(d.getHours()).padStart(2, '0');
+                    const minutes = String(d.getMinutes()).padStart(2, '0');
+                    document.getElementById('adminTournamentStart').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                }
+
+                let html = '';
+                let i = 1;
+                Object.entries(players).forEach(([uid, p]) => {
+                    html += `<tr>
+                        <td>${i++}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name + '&background=ffd700&color=000&size=30'}" class="user-avatar" style="width: 30px; height: 30px;">
+                                <div>${p.name}</div>
+                            </div>
+                        </td>
+                        <td>${formatDate(p.joinedAt)}</td>
+                        <td>
+                            <button class="action-btn btn-danger" onclick="removeAdminTournamentPlayer('${uid}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById('adminTournamentPlayersTable').innerHTML = html || '<tr><td colspan="4" class="text-center">No players</td></tr>';
+            } catch (error) {
+                console.error('Error loading admin tournament:', error);
+            }
+      }
+
+      window.removeAdminTournamentPlayer = async (uid) => {
+            if (!confirm('Remove player from admin tournament? This will NOT refund their entry fee.')) return;
+            showLoader();
+            try {
+                await db.ref(`adminTournament/players/${uid}`).remove();
+                showToast('Player removed');
+                loadAdminTournament();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        };
+
+        document.getElementById('adminTournamentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const entryFee = parseInt(document.getElementById('adminTournamentEntry').value);
+            const roomId = document.getElementById('adminTournamentRoomId').value.trim();
+            const password = document.getElementById('adminTournamentPassword').value.trim();
+            const startTime = new Date(document.getElementById('adminTournamentStart').value).getTime();
+
+            showLoader();
+            try {
+                await db.ref('adminTournament').update({
+                    entryFee: entryFee,
+                    roomId: roomId,
+                    roomPassword: password,
+                    startTime: startTime,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                showToast('Admin tournament updated!');
+                loadAdminTournament();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Notifications
+        async function loadNotifications() {
+            try {
+                const notifSnap = await db.ref('notifications').orderByChild('timestamp').limitToLast(10).once('value');
+                const notifs = notifSnap.val() || {};
+                let html = '';
+                Object.entries(notifs).reverse().forEach(([key, n]) => {
+                    html += `<tr>
+                        <td>${formatDate(n.timestamp)}</td>
+                        <td>${n.title}</td>
+                        <td>${n.message}</td>
+                        <td>${n.audience || 'All'}</td>
+                    </tr>`;
+                });
+                document.getElementById('recentNotificationsTable').innerHTML = html || '<tr><td colspan="4" class="text-center">No notifications sent</td></tr>';
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        async function loadTournamentSelect() {
+            try {
+                const snap = await db.ref('tournaments').once('value');
+                const tournaments = snap.val() || {};
+                let options = '<option value="">Choose tournament...</option>';
+                Object.entries(tournaments).forEach(([id, t]) => {
+                    options += `<option value="${id}">${t.name} (${t.gameId})</option>`;
+                });
+                document.getElementById('tournamentSelect').innerHTML = options;
+            } catch (error) {
+                console.error('Error loading tournament select:', error);
+            }
+        }
+
+        document.getElementById('globalNotificationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('globalNotifTitle').value;
+            const message = document.getElementById('globalNotifMessage').value;
+            const link = document.getElementById('globalNotifLink').value;
+
+            showLoader();
+            try {
+                const notif = {
+                    title,
+                    message,
+                    link: link || null,
+                    audience: 'all',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    sentBy: currentAdmin?.uid
+                };
+                await db.ref('notifications').push(notif);
+                showToast('Notification sent to all users');
+                document.getElementById('globalNotificationForm').reset();
+                loadNotifications();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        document.getElementById('tournamentNotificationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tournamentId = document.getElementById('tournamentSelect').value;
+            const title = document.getElementById('tournamentNotifTitle').value;
+            const message = document.getElementById('tournamentNotifMessage').value;
+
+            if (!tournamentId) {
+                alert('Please select a tournament');
+                return;
+            }
+
+            showLoader();
+            try {
+                const snap = await db.ref(`tournaments/${tournamentId}`).once('value');
+                const tournament = snap.val();
+                if (!tournament) {
+                    showToast('Tournament not found', 'error');
+                    return;
+                }
+
+                const players = tournament.registeredPlayers ? Object.keys(tournament.registeredPlayers) : [];
+                if (players.length === 0) {
+                    showToast('No players in this tournament', 'warning');
+                    return;
+                }
+
+                const notif = {
+                    title,
+                    message,
+                    tournamentId,
+                    audience: 'tournament_players',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    sentBy: currentAdmin?.uid
+                };
+                await db.ref('notifications').push(notif);
+
+                showToast(`Notification sent to ${players.length} players`);
+                document.getElementById('tournamentNotificationForm').reset();
+                loadNotifications();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Settings
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoader();
+            try {
+                await db.ref('settings').update({
+                    appName: document.getElementById('appName').value,
+                    minWithdraw: parseInt(document.getElementById('minWithdraw').value),
+                    signupBonus: parseInt(document.getElementById('signupBonus').value),
+                    referralBonus: parseInt(document.getElementById('referralBonus').value),
+                    supportContact: document.getElementById('supportContact').value
+                });
+                showToast('Settings saved!');
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        document.getElementById('paymentSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoader();
+            try {
+                await db.ref('settings').update({
+                    bankName: document.getElementById('bankName').value,
+                    accountNo: document.getElementById('accountNo').value,
+                    accountHolder: document.getElementById('accountHolder').value,
+                    esewaId: document.getElementById('esewaId').value,
+                    paymentNote: document.getElementById('paymentNote').value
+                });
+                showToast('Payment details saved!');
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // View Screenshot
+        window.viewScreenshot = (screenshot) => {
+            document.getElementById('screenshotView').src = screenshot;
+            new bootstrap.Modal(document.getElementById('screenshotModal')).show();
+        };
+
+        // Auto-refresh
+        setInterval(() => {
+            if (currentAdmin) {
+                const activeSection = document.querySelector('.section.active')?.id;
+                if (activeSection === 'dashboardSection') loadDashboard();
+                else if (activeSection === 'withdrawalsSection') loadWithdrawals();
+                else if (activeSection === 'depositsSection') loadDeposits();
+                else if (activeSection === 'adminTournamentSection') loadAdminTournament();
+                else if (activeSection === 'notificationsSection') loadNotifications();
+                else if (activeSection === 'usersSection') loadUsers();
+                else if (activeSection === 'complaintsSection') loadComplaints();
+            }
+        }, 30000);
+        
+        setTimeout(() => hideLoader(), 5000);
+    </script>
+</body>
+</html>
+
+      
