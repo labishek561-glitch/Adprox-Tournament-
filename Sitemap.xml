@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
   <url>
     <loc>https://labishek561-glitch.github.io/Adprox-Tournament-/</loc>
-    <lastmod>2026-02-08</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <priority>1.0</priority>
   </url>
+
+  <url>
+    <loc>https://labishek561-glitch.github.io/Adprox-Tournament-/about.html</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://labishek561-glitch.github.io/Adprox-Tournament-/contact.html</loc>
+    <priority>0.8</priority>
+  </url>
+
 </urlset>
