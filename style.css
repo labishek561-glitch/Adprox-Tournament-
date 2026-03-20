@@ -1,4 +1,4 @@
-/* --- Premium Gaming Theme --- */
+/* --- Premium Gaming Theme (Updated with Animations) --- */
 :root {
     --primary-bg: #0a0c14;
     --secondary-bg: #151a24;
@@ -87,6 +87,81 @@ a:hover {
         opacity: 1; 
         transform: translateY(0); 
     }
+}
+
+/* Button Animations */
+.btn-custom {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+}
+
+.btn-custom:active {
+    transform: scale(0.95);
+}
+
+.btn-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.btn-custom:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+/* Loading spinner on buttons */
+.btn-custom.loading {
+    pointer-events: none;
+    opacity: 0.7;
+    position: relative;
+}
+
+.btn-custom.loading::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-top: -8px;
+    margin-left: -8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: button-spin 0.6s linear infinite;
+}
+
+@keyframes button-spin {
+    to { transform: rotate(360deg); }
 }
 
 /* Auto-scrolling Announcement Banner */
@@ -316,13 +391,19 @@ a:hover {
     padding: 16px;
     margin-bottom: 15px;
     border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    animation: cardPop 0.3s ease-out;
+}
+
+@keyframes cardPop {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .tournament-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
     border-color: var(--accent-color);
-    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.1);
 }
 
 .tournament-image {
@@ -384,7 +465,6 @@ a:hover {
     50% { opacity: 0.7; }
     100% { opacity: 1; }
 }
-
 /* Progress Bar */
 .progress {
     height: 8px;
@@ -393,7 +473,6 @@ a:hover {
     overflow: hidden;
     margin: 10px 0;
 }
-
 .progress-bar { 
     background: var(--accent-gradient);
     transition: width 0.3s ease;
@@ -415,6 +494,10 @@ a:hover {
     color: var(--accent-color);
     font-weight: 600;
     padding: 5px 0;
+    background: rgba(0,0,0,0.3);
+    padding: 4px 8px;
+    border-radius: 20px;
+    display: inline-block;
 }
 
 /* Host Info */
@@ -483,7 +566,8 @@ a:hover {
     border-radius: 0 8px 8px 0;
     font-weight: 600;
     cursor: pointer;
-  }
+}
+
 /* Custom Card */
 .custom-card {
     background-color: var(--card-bg);
@@ -872,6 +956,8 @@ a:hover {
     justify-content: center;
     color: white;
     font-size: 20px;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .spinner {
@@ -911,7 +997,6 @@ a:hover {
     border: 1px solid var(--warning-color);
     color: var(--warning-color);
 }
-
 /* Text utilities */
 .text-accent {
     color: var(--accent-color);
@@ -1057,12 +1142,14 @@ a:hover {
     margin-top: 15px;
     border: 1px solid var(--border-color);
 }
+
 /* ========== NEW STYLES FOR ENHANCED FEATURES ========== */
 
 /* Game card stats */
 .game-card {
     position: relative;
 }
+
 .game-stats {
     padding: 8px;
     background: rgba(0,0,0,0.7);
@@ -1070,16 +1157,19 @@ a:hover {
     font-size: 0.7rem;
     border-radius: 0 0 12px 12px;
 }
+
 .game-stats small {
     display: block;
     color: var(--text-secondary);
 }
+
 .gun-attributes {
     display: flex;
     gap: 8px;
     margin-top: 4px;
     font-size: 0.6rem;
 }
+
 .gun-attributes span {
     background: var(--accent-color);
     color: black;
@@ -1092,12 +1182,11 @@ a:hover {
     flex-direction: column;
     gap: 10px;
 }
+
 #loaderMessage {
     color: white;
     font-size: 1rem;
 }
-
-
 
 /* Admin tabs */
 .nav-tabs .nav-link {
@@ -1105,6 +1194,7 @@ a:hover {
     background: transparent;
     border: none;
 }
+
 .nav-tabs .nav-link.active {
     background: var(--accent-gradient);
     color: var(--primary-bg);
@@ -1117,6 +1207,7 @@ a:hover {
     cursor: pointer;
     transition: color 0.2s;
 }
+
 .rating-stars .star.active,
 .rating-stars .star:hover {
     color: #ffc107;
@@ -1128,6 +1219,7 @@ a:hover {
     flex-direction: column;
     gap: 5px;
 }
+
 .chat-message {
     background: var(--card-bg);
     padding: 8px 12px;
@@ -1135,11 +1227,13 @@ a:hover {
     max-width: 80%;
     align-self: flex-start;
 }
+
 .chat-message.own {
     background: var(--accent-gradient);
     color: black;
     align-self: flex-end;
 }
+
 .chat-message small {
     font-size: 0.6rem;
     opacity: 0.7;
@@ -1153,6 +1247,7 @@ a:hover {
     padding: 8px;
     border-bottom: 1px solid var(--border-color);
 }
+
 .leaderboard-rank {
     width: 30px;
     height: 30px;
@@ -1164,9 +1259,11 @@ a:hover {
     font-weight: bold;
     color: black;
 }
+
 .leaderboard-name {
     flex: 1;
 }
+
 .leaderboard-earnings {
     font-weight: bold;
     color: var(--accent-color);
@@ -1186,6 +1283,7 @@ a:hover {
     font-size: 1rem;
     padding: 0 5px;
 }
+
 .tournament-header .btn-icon:hover {
     color: var(--accent-color);
 }
@@ -1198,6 +1296,29 @@ a:hover {
     display: inline-block;
     margin: 0 auto;
 }
+
+/* Prize text glow */
+.prize-text {
+    background: linear-gradient(135deg, #ffd70020, #ffaa0020);
+    padding: 5px 10px;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-color);
+    animation: glow 2s infinite alternate;
+}
+@keyframes glow {
+    from { box-shadow: 0 0 5px #ffd700; }
+    to { box-shadow: 0 0 15px #ffaa00; }
+}
+
+/* Distribution note */
+.distribution-note {
+    font-weight: 500;
+    background: rgba(255,215,0,0.15);
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
 /* ===== RESPONSIVE FIXES ===== */
 @media (max-width: 576px) {
     .tournament-card {
@@ -1258,9 +1379,11 @@ a:hover {
 .table-container {
     overflow-x: auto;
 }
+
 .table {
     min-width: 600px;
 }
+
 @media (max-width: 768px) {
     .table {
         min-width: 500px;
@@ -1271,12 +1394,46 @@ a:hover {
 .d-flex.gap-2 {
     flex-wrap: wrap;
 }
+
 .btn-custom {
     white-space: nowrap;
 }
+
 @media (max-width: 400px) {
     .btn-custom {
         font-size: 0.7rem;
         padding: 6px 8px;
     }
+}
+/* Enhanced Tournament Card Text */
+.tournament-card h6 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: var(--accent-color);
+}
+
+    .prize-text {
+    font-size: 1rem;
+    background: linear-gradient(135deg, #ffd70020, #ffaa0020);
+    padding: 5px 10px;
+    border-radius: 8px;
+    display: inline-block;
+    border-left: 3px solid var(--accent-color);
+}
+
+.distribution-note {
+    font-weight: 500;
+    background: rgba(255,215,0,0.15);
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Larger tournament image (already set inline to 120px) */
+.tournament-image {
+    transition: transform 0.2s;
+}
+
+.tournament-image:hover {
+    transform: scale(1.02);
 }
