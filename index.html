@@ -22,11 +22,12 @@
     <!-- Auto-scrolling Announcement Banner -->
     <div class="announcement-banner">
         <div class="announcement-content">
-            <span><i class="bi bi-megaphone-fill"></i> 🎮 BIG NEWS: Free Fire Tournament Starting Soon! Prize Pool NPR 100</span>
+            <span><i class="bi bi megaphone-fill" ></i> 💸💰Aaba khela ra poisa kamau ne haina ta?💸💎</span>
+            <span><i class="bi bi-megaphone-fill"></i> 🎮 BIG NEWS: Free Fire Admin Tournament Starting Soon!</span>
             <span><i class="bi bi-gift-fill"></i> 🎁 Signup Bonus NPR 5 Instant Credit</span>
             <span><i class="bi bi-people-fill"></i> 👥 1v1, 2v2, 3v3, 4v4, 5v5, 6v6 Matches Available</span>
-            <span><i class="bi bi-trophy-fill"></i> 🏆 Admin Tournament: 48 Players | Winner Takes All</span>
-            <span><i class="bi bi-clock-history"></i> ⏰ Withdrawals processed by 10:00 PM daily</span>
+            <span><i class="bi bi-trophy-fill"></i> 🏆 Admin Tournament: 48 Players |Br and other Tournament</span>
+            <span><i class="bi bi-clock-history"></i> ⏰ Withdrawals processed by 10:30 PM daily</span>
         </div>
     </div>
 
@@ -83,8 +84,8 @@
                 <div id="signupFormContainer" style="display: none;">
                     <form id="signupForm" class="custom-card">
                         <div class="mb-3">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="signupName" placeholder="Enter your name" required>
+                            <label class="form-label">Full Game Name</label>
+                            <input type="text" class="form-control" id="signupName" placeholder="Enter your Game name" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Email</label>
@@ -256,6 +257,22 @@
                         <input type="number" class="khel-field-input" id="hostFee" min="10" max="1000" value="10" required>
                     </div>
 
+                    <!-- NEW: Team Size -->
+                    <div class="khel-field-group">
+                        <label class="khel-field-label">Team Size</label>
+                        <select class="khel-field-input" id="hostTeamSize" required>
+                            <option value="1">Solo (1 player per team)</option>
+                            <option value="2">Duo (2 players per team)</option>
+                            <option value="4">Squad (4 players per team)</option>
+                        </select>
+                    </div>
+
+                    <!-- NEW: Match Date & Time -->
+                    <div class="khel-field-group">
+                        <label class="khel-field-label">Match Date & Time</label>
+                        <input type="datetime-local" class="khel-field-input" id="hostMatchDateTime" required>
+                    </div>
+
                     <div class="khel-error" id="khelBalanceError">
                         Insufficient balance to host this match
                     </div>
@@ -264,12 +281,19 @@
                 </form>
             </div>
         </section>
-
-        <!-- ========== ADMIN TOURNAMENT SECTION (redesigned) ========== -->
+        <!-- ========== ADMIN TOURNAMENT SECTION ========== -->
         <section id="br-section" class="section">
             <h2 class="section-title"><i class="bi bi-people-fill"></i> Admin Tournaments</h2>
 
-            <!-- Tabs -->
+            <!-- Mode Filters -->
+            <div class="d-flex gap-2 mb-2 flex-wrap">
+                <button class="btn-custom btn-custom-secondary flex-grow-1 active" data-admin-mode="all">All</button>
+                <button class="btn-custom btn-custom-secondary flex-grow-1" data-admin-mode="Solo">Solo</button>
+                <button class="btn-custom btn-custom-secondary flex-grow-1" data-admin-mode="Duo">Duo</button>
+                <button class="btn-custom btn-custom-secondary flex-grow-1" data-admin-mode="Squad">Squad</button>
+            </div>
+
+            <!-- Status Tabs -->
             <div class="d-flex gap-2 mb-3">
                 <button class="btn-custom btn-custom-secondary flex-grow-1 active" data-admin-status="upcoming">Upcoming</button>
                 <button class="btn-custom btn-custom-secondary flex-grow-1" data-admin-status="ongoing">Ongoing</button>
@@ -301,9 +325,15 @@
                             <label class="form-label">Entry Fee (NPR)</label>
                             <input type="number" class="form-control" id="adminEntryFee" min="10" value="50" required>
                         </div>
+                        <!-- Prize pool removed, replaced with distribution type -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Prize Pool (NPR)</label>
-                            <input type="number" class="form-control" id="adminPrizePool" min="0" value="100" required>
+                            <label class="form-label">Distribution Type</label>
+                            <select class="form-select" id="adminDistributionType" required>
+                                <option value="Winner Takes All">Winner Takes All</option>
+                                <option value="1st 2.5x, 2nd-10th 2x">1st 2.5x, 2nd-10th 2x</option>
+                                <option value="Top 3: 60%,30%,10%">Top 3: 60%,30%,10%</option>
+                                <option value="Custom">Custom</option>
+                            </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Max Players</label>
@@ -317,9 +347,9 @@
                     <button type="submit" class="btn-custom btn-custom-accent w-100">Create Tournament</button>
                 </form>
             </div>
-    </section>
+        </section>
 
-                <!-- ========== RESULT SUBMISSION SECTION ========== -->
+        <!-- ========== RESULT SUBMISSION SECTION ========== -->
         <section id="result-section" class="section">
             <h2 class="section-title"><i class="bi bi-check-circle"></i> Submit Result</h2>
             <div class="custom-card mb-3">
@@ -332,12 +362,10 @@
                     <p>Click to upload winning screenshot</p>
                     <input type="file" id="resultFileInput" accept="image/*" style="display: none;">
                 </div>
-
                 <div id="resultPreviewContainer" style="display: none;" class="text-center">
                     <img src="" alt="Preview" class="preview-image" id="resultPreview">
                     <button class="btn-custom btn-custom-danger mt-2" id="removeResultBtn">Remove</button>
                 </div>
-
                 <div class="d-flex gap-2 mt-3">
                     <button class="btn-custom btn-custom-success flex-grow-1" id="winBtn">I Won</button>
                     <button class="btn-custom btn-custom-danger flex-grow-1" id="lostBtn">I Lost</button>
@@ -356,7 +384,7 @@
                     <div>
                         <small class="text-secondary">Deposit</small>
                         <h5 class="text-info">NPR <span id="walletDeposit">0</span></h5>
-        </div>
+                    </div>
                     <div>
                         <small class="text-secondary">Winning</small>
                         <h5 class="text-success">NPR <span id="walletWinning">0</span></h5>
@@ -410,7 +438,7 @@
             </div>
         </section>
 
-        <!-- ========== PROFILE SECTION (with complaint form) ========== -->
+        <!-- ========== PROFILE SECTION ========== -->
         <section id="profile-section" class="section">
             <div class="custom-card text-center">
                 <img src="" alt="Avatar" class="rounded-circle mb-3" style="width: 80px; height: 80px; border: 3px solid var(--accent-color); object-fit: cover;" id="profileAvatar">
@@ -420,13 +448,14 @@
                 <div class="custom-card mt-3">
                     <h6>Follow Us</h6>
                     <div class="social-icons">
-                        <a href="https://youtube.com" target="_blank" class="social-icon"><i class="fab fa-youtube"></i></a>
+                        <a href="https://youtube.com/@adprox-tournament?si=YjSt46ZbFRwqWWWE" target="_blank" class="social-icon"><i class="fab fa-youtube"></i></a>
                         <a href="https://m.me" target="_blank" class="social-icon"><i class="fab fa-facebook-messenger"></i></a>
                         <a href="https://tiktok.com" target="_blank" class="social-icon"><i class="fab fa-tiktok"></i></a>
-                        <a href="https://wa.me" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.instagram.com/adprox_tournament?igsh=MXZ5MG9tZzhza2d6MQ==" target="_blank" class="social-icon">
+                            <i class="fab fa-instagram"></i>
+                        </a>        
                     </div>
                 </div>
-
                 <div class="d-flex justify-content-center gap-2 mb-2">
                     <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> 4.5 (23 ratings)</span>
                 </div>
@@ -557,8 +586,7 @@
                 <h4 class="mb-0">Tournament Rules</h4>
             </div>
             <div class="rules-container">
-                <!--rules of all game-->
-    <div class="rules-section">
+                <div class="rules-section">
         <h4 class="section-title">General Rules</h4>
 
         <div class="rule-item">
@@ -714,7 +742,7 @@
 
         <div class="rule-item">
             <div class="rule-icon"><i class="bi bi-check-circle-fill"></i></div>
-            <div>
+          <div>
                 <h6>Hero Selection</h6>
                 <p class="text-secondary small">Matches will be Standard Ranked/Unranked, as per tournament announcement.</p>
             </div>
@@ -749,8 +777,9 @@
             </div>
         </div>
     </div>
+            </div>
+        </section>
 
-</section>
         <!-- ========== TERMS SECTION ========== -->
         <section id="terms-section" class="section">
             <div class="d-flex align-items-center gap-2 mb-3">
@@ -760,7 +789,7 @@
                 <h4 class="mb-0">Terms & Conditions</h4>
             </div>
             <div class="rules-container">
-                <!-- terms items -->
+                <!-- terms content (unchanged) -->
                 <div class="rule-item">
     <div class="rule-icon"><i class="bi bi-check-circle-fill"></i></div>
     <div>
@@ -803,60 +832,11 @@
         <p class="text-secondary small">For any queries, contact support at support@adprotournament.com or via the complaint form in your profile.</p>
     </div>
 </div>
-            </div>
-        </section>
-
-        <!-- ========== LEADERBOARD SECTION ========== -->
-        <section id="leaderboard-section" class="section">
-            <h2 class="section-title"><i class="bi bi-trophy"></i> Leaderboard</h2>
-            <div class="d-flex gap-2 mb-3">
-                <button class="btn-custom btn-custom-secondary flex-grow-1 active" data-leaderboard="weekly">Weekly</button>
-                <button class="btn-custom btn-custom-secondary flex-grow-1" data-leaderboard="monthly">Monthly</button>
-            </div>
-            <div id="leaderboardContainer" class="custom-card"></div>
         </section>
 
         <!-- ========== ADMIN PANEL SECTION ========== -->
         <section id="admin-section" class="section">
             <h2 class="section-title"><i class="bi bi-shield-lock"></i> Admin Panel</h2>
-
-            <div class="custom-card mb-4">
-                <h5>Create Admin Tournament</h5>
-                <form id="adminCreateTournamentForm">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Game</label>
-                            <select class="form-select" id="adminGameSelect" required>
-                                <option value="freefire">Free Fire</option>
-                                <option value="pubg">PUBG Mobile</option>
-                                <option value="cod">COD Mobile</option>
-                                <option value="mobilelegend">Mobile Legends</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Match Date & Time</label>
-                            <input type="datetime-local" class="form-control" id="adminMatchDateTime" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Entry Fee (NPR)</label>
-                            <input type="number" class="form-control" id="adminEntryFee" min="10" value="50" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Prize Pool (NPR)</label>
-                            <input type="number" class="form-control" id="adminPrizePool" min="0" value="100" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Max Players</label>
-                            <input type="number" class="form-control" id="adminMaxPlayers" min="2" value="48" required>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <label class="form-label">Tournament Name</label>
-                            <input type="text" class="form-control" id="adminTournamentName" placeholder="e.g., FreeFire Full Match" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-custom btn-custom-accent w-100">Create Tournament</button>
-                </form>
-            </div>
 
             <!-- Tabs -->
             <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
@@ -879,6 +859,9 @@
                 </div>
                 <div class="tab-pane fade" id="payments" role="tabpanel">
                     <div id="adminPaymentsList" class="custom-card"></div>
+                </div>
+                <div class="tab-pane fade" id="reports" role="tabpanel">
+                    <div id="adminReportsList" class="custom-card"></div>
                 </div>
                 <div class="tab-pane fade" id="reports" role="tabpanel">
                     <div id="adminReportsList" class="custom-card"></div>
@@ -909,6 +892,7 @@
     </div>
 
     <!-- ========== MODALS ========== -->
+
     <!-- Referral Modal -->
     <div class="modal fade" id="referralModal" tabindex="-1">
         <div class="modal-dialog">
@@ -1024,7 +1008,7 @@
         </div>
     </div>
 
-                <!-- Add Money Modal -->
+    <!-- Add Money Modal (static QR removed) -->
     <div class="modal fade" id="addMoneyModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1039,12 +1023,10 @@
                         <small id="amountHelp" class="text-secondary">Amount is valid</small>
                     </div>
                     <button class="btn-custom btn-custom-primary w-100 mb-3" id="generateQrBtn">Generate QR Code</button>
-                    <div class="text-center mb-3">
-    <img src="https://i.ibb.co/8L07SwKh/IMG-20260222-180756.jpg" alt="eSewa QR" style="width:200px; height:200px; border-radius:12px;">
-    <p class="small text-secondary mt-2">Scan this eSewa QR to pay</p>
-    <h6>Please add your name Adprox-tournament name in esewa remarks</h6>
-</div>  
-<div class="upload-area" id="paymentUploadArea">
+                    <div id="qrContainer" style="display:none;" class="text-center mb-3">
+                        <div id="qrCode"></div>
+                    </div>
+                    <div class="upload-area" id="paymentUploadArea">
                         <i class="bi bi-cloud-upload"></i>
                         <p>Upload payment screenshot</p>
                         <input type="file" id="paymentFileInput" accept="image/*" style="display: none;">
@@ -1144,26 +1126,29 @@
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <!-- Delete Options Modal (NEW) -->
+    <div class="modal fade" id="deleteOptionsModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title">Delete Tournament</h5>
+                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to cancel this tournament?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-custom btn-custom-secondary" data-bs-dismiss="modal">No</button>
-                    <button type="button" class="btn-custom btn-custom-danger" id="confirmDeleteBtn">Yes, Delete</button>
+                    <p>How would you like to proceed?</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn-custom btn-custom-success" id="deleteWithRefundBtn">
+                            <i class="bi bi-arrow-repeat"></i> Cancel with Refund
+                        </button>
+                        <button class="btn-custom btn-custom-danger" id="deleteWithoutRefundBtn">
+                            <i class="bi bi-trash"></i> Delete without Refund (Admin only)
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Report Modal -->
+    <!-- ENHANCED REPORT MODAL (with radio options and file upload) -->
     <div class="modal fade" id="reportModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1172,12 +1157,49 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="reportMatchId">
-                    <input type="hidden" id="reportUserId">
-                    <div class="mb-3">
-                        <label class="form-label">Reason</label>
-                        <textarea class="form-control" id="reportReason" rows="3" placeholder="Describe the issue..."></textarea>
-                    </div>
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Select Reason</label>
+                            <div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="reportReasonOption" id="reason1" value="Player did not arrive on time">
+                                    <label class="form-check-label" for="reason1">Player did not arrive on time</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="reportReasonOption" id="reason2" value="Hacker or panel user">
+                                    <label class="form-check-label" for="reason2">Hacker or panel user</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="reportReasonOption" id="reason3" value="UID/Name mismatch">
+                                    <label class="form-check-label" for="reason3">UID/Name mismatch</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="reportReasonOption" id="reason4" value="Room ID mismatch">
+                                    <label class="form-check-label" for="reason4">Room ID mismatch</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="reportReasonOption" id="reason5" value="Other">
+                                    <label class="form-check-label" for="reason5">Other</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Or enter custom reason</label>
+                            <textarea class="form-control" id="reportReason" rows="2" placeholder="Describe the issue..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Screenshot (optional)</label>
+                            <div class="upload-area" id="reportUploadArea">
+                                <i class="bi bi-image"></i>
+                                <p>Click to upload screenshot</p>
+                                <input type="file" id="reportFileInput" accept="image/*" style="display: none;">
+                            </div>
+                            <div id="reportPreviewContainer" style="display:none;" class="text-center">
+                                <img src="" alt="Preview" class="preview-image" id="reportPreview">
+                                <button type="button" class="btn-custom btn-custom-danger mt-2" id="removeReportBtn">Remove</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-custom btn-custom-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -1229,6 +1251,34 @@
                 <div class="modal-footer">
                     <input type="text" class="form-control" id="chatInput" placeholder="Type a message...">
                     <button class="btn-custom btn-custom-accent" id="sendChatBtn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Screenshot Upload Modal -->
+    <div class="modal fade" id="winScreenshotModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Winning Screenshot</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="upload-area" id="winUploadArea">
+                        <i class="bi bi-cloud-upload"></i>
+                        <p>Click to upload screenshot</p>
+                        <input type="file" id="winFileInput" accept="image/*" style="display: none;">
+                    </div>
+                    <div id="winPreviewContainer" style="display:none;" class="text-center">
+                        <img src="" alt="Preview" class="preview-image" id="winPreview">
+                        <button class="btn-custom btn-custom-danger mt-2" id="removeWinBtn">Remove</button>
+                    </div>
+                    <div id="winUploadStatus" class="alert" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-custom btn-custom-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-custom btn-custom-accent" id="submitWinScreenshotBtn">Submit</button>
                 </div>
             </div>
         </div>
