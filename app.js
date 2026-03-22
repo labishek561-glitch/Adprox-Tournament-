@@ -2066,28 +2066,28 @@ document.getElementById('addMoneyBtn')?.addEventListener('click', () => {
 
 let qrCodeInstance = null;
 
-document.getElementById('generateQrBtn')?.addEventListener('click', async function() {
+document.getElementById('generateQrBtn')?.addEventListener('click', function() {
     const amount = document.getElementById('addAmount').value;
     if (!amount || amount < 10 || amount > 1000) {
         showToast('Please enter a valid amount between 10 and 1000', 'error');
         return;
     }
 
-    // Fetch eSewa ID from Firebase settings
-    const settingsSnap = await db.ref('settings').once('value');
-    const settings = settingsSnap.val() || {};
-    const esewaId = settings.esewaId || 'tournament@bank';
-
-    const payUrl = `upi://pay?pa=${esewaId}&pn=AdproTournament&am=${amount}&cu=NPR`;
     const qrContainer = document.getElementById('qrContainer');
     qrContainer.style.display = 'block';
 
-    if (qrCodeInstance) qrCodeInstance.clear();
-    qrCodeInstance = new QRCode(document.getElementById('qrCode'), {
-        text: payUrl,
-        width: 200,
-        height: 200
-    });
+    // Clear any previous QR code
+    const qrCodeDiv = document.getElementById('qrCode');
+    qrCodeDiv.innerHTML = ''; // remove any existing content
+
+    // Create an <img> element and set its src to your image URL
+    const img = document.createElement('img');
+    img.src = 'https://i.ibb.co/8L07SwKh/IMG-20260222-180756.jpg';
+    img.style.width = '200px';
+    img.style.height = '200px';
+    img.style.display = 'block';
+    img.style.margin = '0 auto';
+    qrCodeDiv.appendChild(img);
 });
 
 setupUpload('paymentUploadArea', 'paymentFileInput', 'paymentPreview', 'paymentPreviewContainer', 'removePaymentBtn');
