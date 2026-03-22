@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+         <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -215,73 +215,65 @@
             <div id="gameTournamentsContainer"></div>
         </section>
 
-        <!-- Host Match Section -->
-        <section id="host-section" class="section">
-            <h2 class="section-title"><i class="bi bi-plus-circle"></i> Create Match</h2>
-            <div class="khel-host-card">
-                <div class="khel-header">
-                    <div class="khel-user">
-                        <img src="https://i.ibb.co/nMB5h8tG/file-00000000600871fa8ab73cff3469d5b3.png" class="khel-user-avatar" id="khelAvatar">
-                        <div>
-                            <div class="khel-user-name" id="khelUserName">Adpro Tournament</div>
-                            <div class="khel-user-role" id="khelUserRole">admin</div>
-                        </div>
-                    </div>
-                    <div class="khel-balance" id="khelBalance">NPR 0</div>
+      <!-- Host Match Section -->
+<section id="host-section" class="section">
+    <h2 class="section-title"><i class="bi bi-plus-circle"></i> Create Match</h2>
+    <div class="khel-host-card">
+        <div class="khel-header">
+            <div class="khel-user">
+                <img src="https://i.ibb.co/nMB5h8tG/file-00000000600871fa8ab73cff3469d5b3.png" class="khel-user-avatar" id="khelAvatar">
+                <div>
+                    <div class="khel-user-name" id="khelUserName">Adpro Tournament</div>
+                    <div class="khel-user-role" id="khelUserRole">admin</div>
                 </div>
-
-                <div class="khel-banner">
-                    <i class="bi bi-megaphone-fill"></i> Create Your Own Tournament
-                </div>
-
-                <form id="hostMatchForm">
-                    <div class="khel-field-group">
-                        <label class="khel-field-label">Select Game</label>
-                        <select class="khel-field-input" id="hostGame" required>
-                            <option value="freefire">Free Fire</option>
-                            <option value="pubg">PUBG Mobile</option>
-                            <option value="cod">COD Mobile</option>
-                            <option value="mobilelegend">Mobile Legend</option>
-                        </select>
-                    </div>
-
-                    <div id="gameSpecificOptions" class="mb-3"></div>
-
-                    <div class="khel-field-group">
-                        <label class="khel-field-label">Your UID</label>
-                        <input type="text" class="khel-field-input" id="hostUid" placeholder="Your in-game UID" required>
-                    </div>
-
-                    <div class="khel-field-group">
-                        <label class="khel-field-label">Entry Fee (NPR 10 - 1000)</label>
-                        <input type="number" class="khel-field-input" id="hostFee" min="10" max="1000" value="10" required>
-                    </div>
-
-                    <!-- NEW: Team Size -->
-                    <div class="khel-field-group">
-                        <label class="khel-field-label">Team Size</label>
-                        <select class="khel-field-input" id="hostTeamSize" required>
-                            <option value="1">Solo (1 player per team)</option>
-                            <option value="2">Duo (2 players per team)</option>
-                            <option value="4">Squad (4 players per team)</option>
-                        </select>
-                    </div>
-
-                    <!-- NEW: Match Date & Time -->
-                    <div class="khel-field-group">
-                        <label class="khel-field-label">Match Date & Time</label>
-                        <input type="datetime-local" class="khel-field-input" id="hostMatchDateTime" required>
-                    </div>
-
-                    <div class="khel-error" id="khelBalanceError">
-                        Insufficient balance to host this match
-                    </div>
-
-                    <button type="button" class="khel-create-btn" id="openHostConfirmModal">Create Match</button>
-                </form>
             </div>
-        </section>
-        <!-- ========== ADMIN TOURNAMENT SECTION ========== -->
+            <div class="khel-balance" id="khelBalance">NPR 0</div>
+        </div>
+
+        <div class="khel-banner">
+            <i class="bi bi-megaphone-fill"></i> Create Your Own Tournament
+        </div>
+
+        <form id="hostMatchForm">
+            <div class="khel-field-group">
+                <label class="khel-field-label">Select Game</label>
+                <select class="khel-field-input" id="hostGame" required>
+                    <option value="freefire">Free Fire</option>
+                    <option value="pubg">PUBG Mobile</option>
+                    <option value="cod">COD Mobile</option>
+                    <option value="mobilelegend">Mobile Legend</option>
+                </select>
+            </div>
+
+            <div id="gameSpecificOptions" class="mb-3"></div>
+
+            <!-- Your UID field removed – now taken from gaming profile -->
+
+            <div class="khel-field-group">
+                <label class="khel-field-label">Entry Fee (NPR 10 - 1000)</label>
+                <input type="number" class="khel-field-input" id="hostFee" min="10" max="1000" value="10" required>
+            </div>
+
+            <div class="khel-field-group">
+                <label class="khel-field-label">Team Size</label>
+                <select class="khel-field-input" id="hostTeamSize" required>
+                    <option value="1">Solo (1 player per team)</option>
+                    <option value="2">Duo (2 players per team)</option>
+                    <option value="4">Squad (4 players per team)</option>
+                </select>
+            </div>
+
+            <!-- Match Date & Time field removed – defaults to 10 minutes from now -->
+
+            <div class="khel-error" id="khelBalanceError">
+                Insufficient balance to host this match
+            </div>
+
+            <button type="button" class="khel-create-btn" id="openHostConfirmModal">Create Match</button>
+        </form>
+    </div>
+</section>     
+<!-- ========== ADMIN TOURNAMENT SECTION ========== -->
         <section id="br-section" class="section">
             <h2 class="section-title"><i class="bi bi-people-fill"></i> Admin Tournaments</h2>
 
@@ -668,9 +660,9 @@
                 <p class="text-secondary small">All decisions made by admins regarding matches, disputes, or cheating are final. Participants must comply.</p>
             </div>
         </div>
-    </div>
+                            </div>
 
-    <!-- Free Fire Rules -->
+                    <!-- Free Fire Rules -->
     <div class="rules-section">
         <h4 class="section-title">Free Fire Rules</h4>
 
@@ -742,7 +734,7 @@
 
         <div class="rule-item">
             <div class="rule-icon"><i class="bi bi-check-circle-fill"></i></div>
-          <div>
+            <div>
                 <h6>Hero Selection</h6>
                 <p class="text-secondary small">Matches will be Standard Ranked/Unranked, as per tournament announcement.</p>
             </div>
@@ -1074,8 +1066,8 @@
                     </div>
                     <h6>Mobile Legends</h6>
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <input type="text" class="form-control" id="mlNameInput" placeholder="Name">
+                          <div class="col-6">
+                              <input type="text" class="form-control" id="mlNameInput" placeholder="Name">
                         </div>
                         <div class="col-6">
                             <input type="text" class="form-control" id="mlUidInput" placeholder="ID">
@@ -1132,7 +1124,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete Tournament</h5>
-                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <p>How would you like to proceed?</p>
@@ -1291,4 +1283,5 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="app.js"></script>
 </body>
-</html>
+    </html>
+                            
