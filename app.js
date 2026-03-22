@@ -106,8 +106,13 @@ function formatCurrency(amount) {
     return 'NPR ' + (amount || 0).toFixed(2);
 }
 
-window.copyToClipboard = function(elementId) {
-    const text = document.getElementById(elementId)?.innerText || elementId;
+window.copyToClipboard = function(elementIdOrText) {
+    let text;
+    if (typeof elementIdOrText === 'string' && document.getElementById(elementIdOrText)) {
+        text = document.getElementById(elementIdOrText).innerText;
+    } else {
+        text = elementIdOrText;
+    }
     navigator.clipboard?.writeText(text).then(() => {
         showToast('Copied!');
     }).catch(() => {
@@ -206,27 +211,35 @@ async function addToWallet(amount, reason, description, type = 'winning') {
         console.error('Add to wallet failed:', error);
         return false;
     }
-    }
+}
 
 // ==================== NOTIFICATION SYSTEM ====================
 async function sendNotification(uid, title, message) {
     if (!uid) return;
+
+    // Store in Firebase for in-app notifications
+    const notifRef = db.ref(`notifications/${uid}`).push();
+    await notifRef.set({
+        title,
+        message,
+        read: false,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    // Show browser notification if permission granted
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
         try {
             new Notification(title, { body: message });
         } catch (e) {
             console.warn('Browser notification failed', e);
         }
+    } else if (typeof Notification !== 'undefined' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
     }
-    await db.ref(`notifications/${uid}`).push({
-        title,
-        message,
-        read: false,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
 }
+
 function requestNotificationPermission() {
-    if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
         Notification.requestPermission();
     }
 }
@@ -247,7 +260,6 @@ async function userHasActiveMatch() {
     }
     return false;
 }
-
 // ==================== SECTION SWITCHING ====================
 function showSection(sectionId) {
     elements.sections.forEach(s => s.classList.remove('active'));
@@ -281,6 +293,19 @@ function showSection(sectionId) {
             }
             break;
     }
+}
+
+// ==================== UPDATE HOST PREVIEW ====================
+function updateHostPreview() {
+    if (!appState.currentUser) return;
+    const avatarEl = document.getElementById('khelAvatar');
+    if (avatarEl) {
+        avatarEl.src = appState.userProfile.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(appState.userProfile.displayName || 'User')}&background=ffd700&color=000&size=35`;
+    }
+    const nameEl = document.getElementById('khelUserName');
+    if (nameEl) nameEl.textContent = appState.userProfile.displayName || 'User';
+    const balanceEl = document.getElementById('khelBalance');
+    if (balanceEl) balanceEl.textContent = 'NPR ' + Math.floor(getTotalBalance());
 }
 
 // ==================== GAME CARDS ====================
@@ -342,25 +367,32 @@ function renderTournamentCard(id, t) {
 
     // Hide card from non-joined users if match start time has passed
     if (t.status === 'upcoming' && matchDate && now > matchDate && !joined && !isHost) {
-        return ''; // don't show this card
+        return '';
     }
 
     let showJoin = false;
-    if (!joined && !isHost && t.status === 'upcoming' && !isFull && !requested) {
-        if (!matchDate || now < matchDate) {
-            showJoin = true;
+    if (t.isAdminTournament) {
+        if (!joined && t.status === 'upcoming' && !isFull) {
+            if (!matchDate || now < matchDate) {
+                showJoin = true;
+            }
+        }
+    } else {
+        if (!joined && !isHost && t.status === 'upcoming' && !isFull && !requested) {
+            if (!matchDate || now < matchDate) {
+                showJoin = true;
+            }
         }
     }
 
     let requestMessage = '';
-    if (requested) {
+    if (!t.isAdminTournament && requested) {
         requestMessage = `<p class="small text-warning mt-1"><i class="bi bi-hourglass-split"></i> Request sent, waiting for host approval.</p>`;
     }
 
     let revealNote = '';
     if (t.isAdminTournament && t.status === 'upcoming' && !t.showIdPass && t.matchDate) {
-        const matchTime = new Date(t.matchDate).getTime();
-        const diffMinutes = Math.floor((matchTime - now) / 60000);
+        const diffMinutes = Math.floor((t.matchDate - now) / 60000);
         if (diffMinutes > 2) {
             revealNote = `<p class="small text-info mt-1"><i class="bi bi-info-circle"></i> Room ID & password will appear 2 minutes before match start.</p>`;
         } else if (diffMinutes <= 2 && diffMinutes > 0) {
@@ -470,7 +502,6 @@ function renderTournamentCard(id, t) {
 
     const gameOptionsHtml = renderGameOptions(t);
 
-    // Get player's own gaming UID if joined
     let ownGameUidHtml = '';
     if (joined && !t.isAdminTournament) {
         const game = t.game;
@@ -526,7 +557,7 @@ function renderTournamentCard(id, t) {
             ${provideButton}
             <div class="d-flex gap-2 mt-2">
                 ${chatButton}
-                ${showJoin ? '<button class="btn-custom btn-custom-accent flex-grow-1 request-join" data-id="' + id + '">Request to Join (NPR ' + t.entryFee + ')</button>' : ''}
+                ${showJoin ? '<button class="btn-custom btn-custom-accent flex-grow-1 join-tournament" data-id="' + id + '">Join (NPR ' + t.entryFee + ')</button>' : ''}
                 ${resultButtons}
                 ${reportButton}
                 ${isFull && t.status === 'upcoming' ? '<button class="btn-custom btn-custom-secondary flex-grow-1" disabled>Match Full</button>' : ''}
@@ -535,7 +566,7 @@ function renderTournamentCard(id, t) {
         </div>
     `;
 }
-// Helper to get opponent ID from tournament (for reporting)
+
 function getOpponentId(t) {
     if (!appState.currentUser) return null;
     const players = t.registeredPlayers || {};
@@ -547,14 +578,14 @@ function getOpponentId(t) {
     }
 }
 
-// ==================== RENDER HOSTED CARD (for host view) ====================
+// ==================== RENDER HOSTED CARD ====================
 function renderHostedCard(id, t) {
     const registeredCount = t.registeredPlayers ? Object.keys(t.registeredPlayers).length : 0;
     const maxPlayers = t.maxPlayers || 2;
     const joinerId = Object.keys(t.registeredPlayers || {}).find(uid => uid !== t.hostId);
     const joiner = joinerId ? t.registeredPlayers[joinerId] : null;
     const totalPool = t.entryFee * maxPlayers;
-    const prize = totalPool - (totalPool * 0.05);
+    const prize = totalPool - totalPool * 0.05;
     const showProvide = t.status === 'upcoming' && !t.showIdPass && registeredCount > 0;
 
     const requests = t.joinRequests || {};
@@ -608,7 +639,6 @@ function renderHostedCard(id, t) {
         requestsHtml += '</div>';
     }
 
-    // Display opponent's gaming UID if available
     let opponentDisplay = '';
     if (joiner) {
         const opponentGameUid = joiner.gameUid || joiner.uid;
@@ -628,7 +658,7 @@ function renderHostedCard(id, t) {
             <div class="host-info">
                 <img src="${appState.userProfile.photoURL || 'https://i.ibb.co/nMB5h8tG/file-00000000600871fa8ab73cff3469d5b3.png'}" class="host-avatar">
                 <div class="host-details">
-                    <div class="host-name">You</div>
+              <div class="host-name">You</div>
                     <div class="host-label">UID: ${t.hostUid || 'N/A'} <button class="btn-custom btn-custom-secondary btn-sm" onclick="copyToClipboard('${t.hostUid}')">Copy</button></div>
                 </div>
             </div>
@@ -712,17 +742,10 @@ async function loadHomeData() {
 }
 
 function attachTournamentListeners() {
-    document.querySelectorAll('.request-join').forEach(btn => {
-        btn.removeEventListener('click', requestJoinHandler);
-        btn.addEventListener('click', requestJoinHandler);
-    });
-    document.querySelectorAll('.approve-request').forEach(btn => {
-        btn.removeEventListener('click', approveRequestHandler);
-        btn.addEventListener('click', approveRequestHandler);
-    });
-    document.querySelectorAll('.reject-request').forEach(btn => {
-        btn.removeEventListener('click', rejectRequestHandler);
-        btn.addEventListener('click', rejectRequestHandler);
+    // Regular buttons
+    document.querySelectorAll('.join-tournament').forEach(btn => {
+        btn.removeEventListener('click', joinHandler);
+        btn.addEventListener('click', joinHandler);
     });
     document.querySelectorAll('.provide-room').forEach(btn => {
         btn.removeEventListener('click', provideHandler);
@@ -752,10 +775,34 @@ function attachTournamentListeners() {
         btn.removeEventListener('click', deleteTournamentHandler);
         btn.addEventListener('click', deleteTournamentHandler);
     });
+
+    // Use event delegation for approve/reject buttons
+    document.removeEventListener('click', approveRejectDelegation);
+    document.addEventListener('click', approveRejectDelegation);
 }
 
-// ==================== TOURNAMENT HANDLERS ====================
-async function requestJoinHandler(e) {
+function approveRejectDelegation(e) {
+    const approveBtn = e.target.closest('.approve-request');
+    const rejectBtn = e.target.closest('.reject-request');
+    if (approveBtn) {
+        e.preventDefault();
+        const tournamentId = approveBtn.dataset.id;
+        const userId = approveBtn.dataset.user;
+        if (tournamentId && userId) {
+            approveRequestHandler({ dataset: { id: tournamentId, user: userId } });
+        }
+    } else if (rejectBtn) {
+        e.preventDefault();
+        const tournamentId = rejectBtn.dataset.id;
+        const userId = rejectBtn.dataset.user;
+        if (tournamentId && userId) {
+            rejectRequestHandler({ dataset: { id: tournamentId, user: userId } });
+        }
+    }
+}
+
+// ==================== JOIN HANDLER ====================
+async function joinHandler(e) {
     const tournamentId = e.target.dataset.id;
     if (!appState.currentUser) { showToast('Login first', 'error'); return; }
 
@@ -764,166 +811,91 @@ async function requestJoinHandler(e) {
         return;
     }
 
-    showLoader('Sending join request...');
+    showLoader('Processing...');
     try {
         const snap = await db.ref(`tournaments/${tournamentId}`).once('value');
         const t = snap.val();
         if (!t) { showToast('Tournament not found', 'error'); return; }
         if (t.hostId === appState.currentUser.uid) { showToast('You cannot join your own match', 'error'); return; }
         if (t.registeredPlayers && t.registeredPlayers[appState.currentUser.uid]) { showToast('Already joined', 'info'); return; }
-        if (t.joinRequests && t.joinRequests[appState.currentUser.uid]) { showToast('Request already sent', 'info'); return; }
         const registeredCount = Object.keys(t.registeredPlayers || {}).length;
         const maxPlayers = t.maxPlayers || 2;
         if (registeredCount >= maxPlayers) { showToast('Match is full', 'error'); return; }
+        const totalBalance = getTotalBalance();
+        if (totalBalance < t.entryFee) { showToast('Insufficient balance', 'error'); return; }
 
-        // Get the gaming UID for this tournament's game
-        const game = t.game;
-        const gameUidField = {
-            freefire: 'ffUid',
-            pubg: 'pubgUid',
-            cod: 'codUid',
-            mobilelegend: 'mlUid'
-        }[game];
-        const gameUid = appState.userProfile.gaming?.[gameUidField] || '';
+        // Admin tournament: direct join
+        if (t.isAdminTournament) {
+            const deducted = await deductFromWallet(t.entryFee, 'join_fee', `Joined admin match: ${t.name}`);
+            if (!deducted) { showToast('Failed to deduct entry fee', 'error'); return; }
 
-        // Create join request
-        const requestData = {
-            uid: appState.currentUser.uid,
-            name: appState.userProfile.displayName,
-            gameUid: gameUid,
-            requestedAt: firebase.database.ServerValue.TIMESTAMP
-        };
-        await db.ref(`tournaments/${tournamentId}/joinRequests/${appState.currentUser.uid}`).set(requestData);
+            const game = t.game;
+            const gaming = appState.userProfile.gaming || {};
+            let inGameUid = '';
+            if (game === 'freefire') inGameUid = gaming.ffUid || '';
+            else if (game === 'pubg') inGameUid = gaming.pubgUid || '';
+            else if (game === 'cod') inGameUid = gaming.codUid || '';
+            else if (game === 'mobilelegend') inGameUid = gaming.mlUid || '';
 
-        showToast('Join request sent. Waiting for host approval.');
-        loadHomeData();
-    } catch (error) {
-        showToast('Error: ' + error.message, 'error');
-    } finally { hideLoader(); }
-}
+            const playerData = {
+                uid: appState.currentUser.uid,
+                name: appState.userProfile.displayName,
+                slot: registeredCount + 1,
+                inGameUid: inGameUid,
+                tournamentName: t.name,
+                joinedAt: firebase.database.ServerValue.TIMESTAMP
+            };
 
-async function approveRequestHandler(e) {
-    const tournamentId = e.target.dataset.id;
-    const userId = e.target.dataset.user;
-    if (!tournamentId || !userId) return;
+            const dbUpdates = {};
+            dbUpdates[`tournaments/${tournamentId}/registeredPlayers/${appState.currentUser.uid}`] = playerData;
+            dbUpdates[`users/${appState.currentUser.uid}/joinedTournaments/${tournamentId}`] = true;
 
-    showLoader('Approving request...');
-    try {
-        const snap = await db.ref(`tournaments/${tournamentId}`).once('value');
-        const t = snap.val();
-        if (!t) { showToast('Tournament not found', 'error'); return; }
-        if (t.hostId !== appState.currentUser.uid) { showToast('Unauthorized', 'error'); return; }
+            await db.ref().update(dbUpdates);
 
-        const registeredCount = Object.keys(t.registeredPlayers || {}).length;
-        const maxPlayers = t.maxPlayers || 2;
-        if (registeredCount >= maxPlayers) { showToast('Match is already full', 'error'); return; }
-
-        // Check user balance
-        const userSnap = await db.ref(`users/${userId}`).once('value');
-        const user = userSnap.val();
-        if (!user) { showToast('User not found', 'error'); return; }
-        const totalBalance = (user.depositBalance || 0) + (user.winningCash || 0) + (user.bonusCash || 0);
-        if (totalBalance < t.entryFee) {
-            showToast('User has insufficient balance', 'error');
-            return;
-        }
-
-        // Deduct fee from user's wallet
-        const deducted = await deductFromWalletForUser(userId, t.entryFee, 'join_fee', `Joined match: ${t.name}`);
-        if (!deducted) { showToast('Failed to deduct entry fee', 'error'); return; }
-
-        // Move from joinRequests to registeredPlayers
-        const requestData = t.joinRequests[userId];
-        const playerData = {
-            uid: userId,
-            name: requestData.name,
-            gameUid: requestData.gameUid || '',
-            joinedAt: firebase.database.ServerValue.TIMESTAMP
-        };
-        const dbUpdates = {};
-        dbUpdates[`tournaments/${tournamentId}/registeredPlayers/${userId}`] = playerData;
-        dbUpdates[`tournaments/${tournamentId}/joinRequests/${userId}`] = null; // remove request
-        dbUpdates[`users/${userId}/joinedTournaments/${tournamentId}`] = true;
-
-        // Check if match becomes full
-        if (registeredCount + 1 === maxPlayers) {
-            dbUpdates[`tournaments/${tournamentId}/status`] = 'ongoing';
-            dbUpdates[`tournaments/${tournamentId}/fullSince`] = firebase.database.ServerValue.TIMESTAMP;
-        }
-
-        await db.ref().update(dbUpdates);
-
-        // Notify player
-        sendNotification(userId, 'Join Request Approved', `Your request to join ${t.name} has been approved. Entry fee deducted.`);
-
-        showToast('Request approved. Player joined.');
-        loadHomeData();
-    } catch (error) {
-        showToast('Error: ' + error.message, 'error');
-    } finally { hideLoader(); }
-}
-
-async function rejectRequestHandler(e) {
-    const tournamentId = e.target.dataset.id;
-    const userId = e.target.dataset.user;
-    if (!tournamentId || !userId) return;
-
-    showLoader('Rejecting request...');
-    try {
-        const snap = await db.ref(`tournaments/${tournamentId}`).once('value');
-        const t = snap.val();
-        if (!t) { showToast('Tournament not found', 'error'); return; }
-        if (t.hostId !== appState.currentUser.uid) { showToast('Unauthorized', 'error'); return; }
-
-        await db.ref(`tournaments/${tournamentId}/joinRequests/${userId}`).remove();
-
-        // Notify player
-        sendNotification(userId, 'Join Request Rejected', `Your request to join ${t.name} was rejected by the host.`);
-
-        showToast('Request rejected.');
-        loadHomeData();
-    } catch (error) {
-        showToast('Error: ' + error.message, 'error');
-    } finally { hideLoader(); }
-}
-
-// Helper to deduct from any user's wallet (used by host when approving)
-async function deductFromWalletForUser(userId, amount, reason, description) {
-    const userRef = db.ref(`users/${userId}`);
-    try {
-        const result = await userRef.transaction((user) => {
-            if (!user) return user;
-            let deposit = Number(user.depositBalance) || 0;
-            let winning = Number(user.winningCash) || 0;
-            let bonus = Number(user.bonusCash) || 0;
-            let total = deposit + winning + bonus;
-            if (total < amount) return;
-            let remaining = amount;
-            if (deposit >= remaining) { deposit -= remaining; remaining = 0; }
-            else { remaining -= deposit; deposit = 0; }
-            if (remaining > 0) {
-                if (winning >= remaining) { winning -= remaining; remaining = 0; }
-                else { remaining -= winning; winning = 0; }
+            // Notify admin
+            const adminUid = (await db.ref('adminConfig/adminUid').once('value')).val();
+            if (adminUid) {
+                sendNotification(adminUid, 'Player Joined Admin Tournament', `${appState.userProfile.displayName} joined ${t.name} (Slot ${registeredCount+1})`);
             }
-            if (remaining > 0) bonus -= remaining;
-            user.depositBalance = deposit;
-            user.winningCash = winning;
-            user.bonusCash = bonus;
-            return user;
-        });
-        if (!result.committed) return false;
-        await db.ref(`transactions/${userId}`).push({
-            type: reason,
-            amount: -amount,
-            description,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
-        return true;
+
+            showToast('Joined successfully!');
+        } else {
+            // User-hosted match: send join request
+            if (t.joinRequests && t.joinRequests[appState.currentUser.uid]) { showToast('Request already sent', 'info'); return; }
+
+            const game = t.game;
+            const gameUidField = {
+                freefire: 'ffUid',
+                pubg: 'pubgUid',
+                cod: 'codUid',
+                mobilelegend: 'mlUid'
+            }[game];
+            const gameUid = appState.userProfile.gaming?.[gameUidField] || '';
+
+            const requestData = {
+                uid: appState.currentUser.uid,
+                name: appState.userProfile.displayName,
+                gameUid: gameUid,
+                requestedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            await db.ref(`tournaments/${tournamentId}/joinRequests/${appState.currentUser.uid}`).set(requestData);
+            showToast('Join request sent. Waiting for host approval.');
+        }
+
+        loadHomeData();
+        if (appState.currentSection === 'game-tournaments-section' && appState.currentGameFilter) {
+            loadGameTournaments(appState.currentGameFilter);
+        }
+        if (appState.currentSection === 'br-section') {
+            const activeTab = document.querySelector('[data-admin-status].active')?.dataset.adminStatus || 'upcoming';
+            const activeMode = document.querySelector('[data-admin-mode].active')?.dataset.adminMode || 'all';
+            loadAdminTournaments(activeTab, activeMode);
+        }
     } catch (error) {
-        console.error(error);
-        return false;
-    }
+        showToast('Error: ' + error.message, 'error');
+    } finally { hideLoader(); }
 }
+
 async function provideHandler(e) {
     const tournamentId = e.target.dataset.id;
     appState.currentMatchId = tournamentId;
@@ -941,12 +913,10 @@ document.getElementById('submitProvideRoomBtn')?.addEventListener('click', async
             roomId, roomPassword: password, showIdPass: true,
             roomProvidedAt: firebase.database.ServerValue.TIMESTAMP
         });
-
         if (countdownIntervals[appState.currentMatchId]) {
             clearInterval(countdownIntervals[appState.currentMatchId]);
             delete countdownIntervals[appState.currentMatchId];
         }
-
         showToast('Room details provided');
         bootstrap.Modal.getInstance(document.getElementById('provideRoomModal')).hide();
         document.getElementById('provideRoomId').value = '';
@@ -956,8 +926,7 @@ document.getElementById('submitProvideRoomBtn')?.addEventListener('click', async
         showToast('Error: ' + error.message, 'error');
     } finally { hideLoader(); }
 });
-
-// ==================== WIN CLAIM WITH SCREENSHOT UPLOAD ====================
+// ==================== WIN CLAIM ====================
 async function claimWinHandler(e) {
     const tournamentId = e.target.dataset.id;
     if (!appState.currentUser) return;
@@ -994,7 +963,6 @@ document.getElementById('submitWinScreenshotBtn')?.addEventListener('click', asy
                 status: 'pending',
                 claimedAt: firebase.database.ServerValue.TIMESTAMP
             });
-
             showToast('Win claim submitted, awaiting admin approval.');
             bootstrap.Modal.getInstance(document.getElementById('winScreenshotModal')).hide();
             loadHomeData();
@@ -1125,7 +1093,6 @@ document.getElementById('saveEditTournamentBtn')?.addEventListener('click', asyn
 async function deleteTournamentHandler(e) {
     const id = e.target.closest('.delete-tournament')?.dataset.id;
     if (!id) return;
-    
     appState.tournamentToDelete = id;
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteOptionsModal'));
     deleteModal.show();
@@ -1134,7 +1101,6 @@ async function deleteTournamentHandler(e) {
 document.getElementById('deleteWithRefundBtn')?.addEventListener('click', async () => {
     const id = appState.tournamentToDelete;
     if (!id) return;
-    
     bootstrap.Modal.getInstance(document.getElementById('deleteOptionsModal')).hide();
     showLoader('Processing refunds...');
     try {
@@ -1157,12 +1123,10 @@ document.getElementById('deleteWithRefundBtn')?.addEventListener('click', async 
 document.getElementById('deleteWithoutRefundBtn')?.addEventListener('click', async () => {
     const id = appState.tournamentToDelete;
     if (!id) return;
-    
     if (appState.userProfile.role !== 'admin') {
         showToast('Only admin can delete without refund', 'error');
         return;
     }
-
     bootstrap.Modal.getInstance(document.getElementById('deleteOptionsModal')).hide();
     showLoader('Deleting tournament...');
     try {
@@ -1204,28 +1168,22 @@ async function cancelTournamentWithRefund(tournamentId) {
             timestamp: firebase.database.ServerValue.TIMESTAMP
         });
     }
-
     await db.ref(`tournaments/${tournamentId}`).remove();
-
     if (countdownIntervals[tournamentId]) {
         clearInterval(countdownIntervals[tournamentId]);
         delete countdownIntervals[tournamentId];
     }
 }
-
 // ==================== AUTO ROOM REVEAL FOR ADMIN TOURNAMENTS ====================
 async function checkAdminRoomReveal() {
     const now = Date.now();
     const twoMinutes = 2 * 60 * 1000;
-
     const snapshot = await db.ref('tournaments')
         .orderByChild('isAdminTournament')
         .equalTo(true)
         .once('value');
-
     const tournaments = snapshot.val() || {};
     const dbUpdates = {};
-
     Object.entries(tournaments).forEach(([id, t]) => {
         if (!t.matchDate) return;
         const timeDiff = t.matchDate - now;
@@ -1233,7 +1191,6 @@ async function checkAdminRoomReveal() {
             dbUpdates[`tournaments/${id}/showIdPass`] = true;
         }
     });
-
     if (Object.keys(dbUpdates).length > 0) {
         await db.ref().update(dbUpdates);
     }
@@ -1338,7 +1295,8 @@ function startCountdowns() {
             countdownIntervals[id] = setInterval(updateTimer, 1000);
         }
     });
-}
+                }
+
 // ==================== GAME‑SPECIFIC OPTIONS FOR HOST ====================
 const gameOptionsTemplates = {
     freefire: `
@@ -1478,7 +1436,6 @@ document.getElementById('openHostConfirmModal')?.addEventListener('click', async
         showToast('Login first', 'error');
         return;
     }
-
     if (await userHasActiveMatch()) {
         showToast('You already have an active match. Please finish or delete it first.', 'error');
         return;
@@ -1489,19 +1446,22 @@ document.getElementById('openHostConfirmModal')?.addEventListener('click', async
     updateAllWalletDisplays();
 
     const game = document.getElementById('hostGame')?.value;
-    const uid = document.getElementById('hostUid')?.value;
     const fee = parseInt(document.getElementById('hostFee')?.value);
     const teamSizeSelect = document.getElementById('hostTeamSize');
     let teamSize = 1;
-    if (teamSizeSelect) {
-        teamSize = parseInt(teamSizeSelect.value);
-    }
-    let matchDateTime = document.getElementById('hostMatchDateTime')?.value;
-    let matchTimestamp;
-    if (matchDateTime) {
-        matchTimestamp = new Date(matchDateTime).getTime();
-    } else {
-        matchTimestamp = Date.now() + 10 * 60 * 1000;
+    if (teamSizeSelect) teamSize = parseInt(teamSizeSelect.value);
+
+    // Get UID from gaming profile
+    const gameUidField = {
+        freefire: 'ffUid',
+        pubg: 'pubgUid',
+        cod: 'codUid',
+        mobilelegend: 'mlUid'
+    }[game];
+    const uid = appState.userProfile.gaming?.[gameUidField] || '';
+    if (!uid) {
+        showToast('Please set your gaming UID in profile first', 'error');
+        return;
     }
 
     const gameOptions = {};
@@ -1525,8 +1485,8 @@ document.getElementById('openHostConfirmModal')?.addEventListener('click', async
         gameOptions.lane = document.getElementById('hostMLLane')?.value;
     }
 
-    if (!uid || !fee || fee < 10 || fee > 1000) {
-        showToast('Please fill all fields correctly', 'error');
+    if (!fee || fee < 10 || fee > 1000) {
+        showToast('Entry fee must be between 10 and 1000', 'error');
         return;
     }
 
@@ -1537,6 +1497,9 @@ document.getElementById('openHostConfirmModal')?.addEventListener('click', async
         return;
     }
     if (khelBalanceError) khelBalanceError.style.display = 'none';
+
+    // Use default match timestamp: 10 minutes from now
+    const matchTimestamp = Date.now() + 10 * 60 * 1000;
 
     document.getElementById('confirmEntryFee').value = formatCurrency(fee);
     const maxPlayers = teamSize === 1 ? 2 : (teamSize === 2 ? 2 : 4);
@@ -1598,7 +1561,6 @@ document.getElementById('confirmHostBtn')?.addEventListener('click', async () =>
         document.getElementById('hostMatchForm')?.reset();
         document.getElementById('hostFee').value = '10';
         document.getElementById('hostGame').dispatchEvent(new Event('change'));
-        if (document.getElementById('hostMatchDateTime')) document.getElementById('hostMatchDateTime').value = '';
         showSection('home-section');
     } catch (error) {
         showToast('Error: ' + error.message, 'error');
@@ -1606,7 +1568,6 @@ document.getElementById('confirmHostBtn')?.addEventListener('click', async () =>
         hideLoader();
     }
 });
-
 // ==================== DAILY ADMIN TOURNAMENT GENERATION ====================
 async function generateDailyTournaments() {
     const today = new Date().toDateString();
@@ -1752,6 +1713,7 @@ document.getElementById('adminCreateTournamentForm')?.addEventListener('submit',
         hideLoader();
     }
 });
+
 // ==================== WALLET ====================
 async function loadWalletData() {
     if (!appState.currentUser) return;
@@ -1897,7 +1859,6 @@ document.getElementById('submitWithdrawSectionBtn')?.addEventListener('click', a
         statusDiv.style.display = 'block';
     } finally { hideLoader(); }
 });
-
 // ==================== PROFILE & GAMING ====================
 function loadProfileData() {
     if (!appState.currentUser) return;
@@ -2112,7 +2073,7 @@ document.getElementById('generateQrBtn')?.addEventListener('click', async functi
         return;
     }
 
-    // Fetch the eSewa ID from Firebase settings
+    // Fetch eSewa ID from Firebase settings
     const settingsSnap = await db.ref('settings').once('value');
     const settings = settingsSnap.val() || {};
     const esewaId = settings.esewaId || 'tournament@bank';
@@ -2422,7 +2383,7 @@ async function loadMatchHistory() {
             `;
         }
     }
-elements.matchHistoryList.innerHTML = historyHtml || '<p class="text-secondary text-center">No completed matches</p>';
+    elements.matchHistoryList.innerHTML = historyHtml || '<p class="text-secondary text-center">No completed matches</p>';
     const totalMatches = appState.userProfile.totalMatches || 0;
     const wins = appState.userProfile.wonMatches || 0;
     const winRate = totalMatches > 0 ? ((wins / totalMatches) * 100).toFixed(1) : 0;
@@ -2447,7 +2408,7 @@ document.querySelectorAll('.star').forEach(star => {
             s.classList.remove('active', 'bi-star-fill');
             s.classList.add('bi-star');
         });
-          for (let i = 1; i <= val; i++) {
+        for (let i = 1; i <= val; i++) {
             const s = document.querySelector(`.star[data-star="${i}"]`);
             s.classList.add('active', 'bi-star-fill');
             s.classList.remove('bi-star');
@@ -2625,7 +2586,6 @@ document.getElementById('copyReferralBtn')?.addEventListener('click', () => {
     const code = document.getElementById('referralCodeDisplay');
     if (code) { code.select(); document.execCommand('copy'); showToast('Referral code copied!'); }
 });
-
 // ==================== LOGOUT ====================
 document.getElementById('logoutBtn')?.addEventListener('click', () => auth.signOut());
 
@@ -2717,3 +2677,125 @@ auth.onAuthStateChanged(user => {
         generateDailyTournaments();
     }
 });
+
+// ==================== APPROVE/REJECT HANDLERS ====================
+async function approveRequestHandler(e) {
+    const tournamentId = e.dataset.id;
+    const userId = e.dataset.user;
+    if (!tournamentId || !userId) return;
+    showLoader('Approving request...');
+    try {
+        const snap = await db.ref(`tournaments/${tournamentId}`).once('value');
+        const t = snap.val();
+        if (!t) { showToast('Tournament not found', 'error'); return; }
+        if (t.hostId !== appState.currentUser.uid) { showToast('Unauthorized', 'error'); return; }
+
+        const registeredCount = Object.keys(t.registeredPlayers || {}).length;
+        const maxPlayers = t.maxPlayers || 2;
+        if (registeredCount >= maxPlayers) { showToast('Match is already full', 'error'); return; }
+
+        // Check user balance
+        const userSnap = await db.ref(`users/${userId}`).once('value');
+        const user = userSnap.val();
+        if (!user) { showToast('User not found', 'error'); return; }
+        const totalBalance = (user.depositBalance || 0) + (user.winningCash || 0) + (user.bonusCash || 0);
+        if (totalBalance < t.entryFee) {
+            showToast('User has insufficient balance', 'error');
+            return;
+        }
+
+        // Deduct fee from user's wallet
+        const deducted = await deductFromWalletForUser(userId, t.entryFee, 'join_fee', `Joined match: ${t.name}`);
+        if (!deducted) { showToast('Failed to deduct entry fee', 'error'); return; }
+
+        // Move from joinRequests to registeredPlayers
+        const requestData = t.joinRequests[userId];
+        const playerData = {
+            uid: userId,
+            name: requestData.name,
+            gameUid: requestData.gameUid || '',
+            joinedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        const dbUpdates = {};
+        dbUpdates[`tournaments/${tournamentId}/registeredPlayers/${userId}`] = playerData;
+        dbUpdates[`tournaments/${tournamentId}/joinRequests/${userId}`] = null; // remove request
+        dbUpdates[`users/${userId}/joinedTournaments/${tournamentId}`] = true;
+
+        // Check if match becomes full
+        if (registeredCount + 1 === maxPlayers) {
+            dbUpdates[`tournaments/${tournamentId}/status`] = 'ongoing';
+            dbUpdates[`tournaments/${tournamentId}/fullSince`] = firebase.database.ServerValue.TIMESTAMP;
+        }
+
+        await db.ref().update(dbUpdates);
+
+        // Notify player
+        sendNotification(userId, 'Join Request Approved', `Your request to join ${t.name} has been approved. Entry fee deducted.`);
+
+        showToast('Request approved. Player joined.');
+        loadHomeData();
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    } finally { hideLoader(); }
+}
+
+async function rejectRequestHandler(e) {
+    const tournamentId = e.dataset.id;
+    const userId = e.dataset.user;
+    if (!tournamentId || !userId) return;
+    showLoader('Rejecting request...');
+    try {
+        const snap = await db.ref(`tournaments/${tournamentId}`).once('value');
+        const t = snap.val();
+        if (!t) { showToast('Tournament not found', 'error'); return; }
+        if (t.hostId !== appState.currentUser.uid) { showToast('Unauthorized', 'error'); return; }
+
+        await db.ref(`tournaments/${tournamentId}/joinRequests/${userId}`).remove();
+
+        // Notify player
+        sendNotification(userId, 'Join Request Rejected', `Your request to join ${t.name} was rejected by the host.`);
+
+        showToast('Request rejected.');
+        loadHomeData();
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    } finally { hideLoader(); }
+}
+
+async function deductFromWalletForUser(userId, amount, reason, description) {
+    const userRef = db.ref(`users/${userId}`);
+    try {
+        const result = await userRef.transaction((user) => {
+            if (!user) return user;
+            let deposit = Number(user.depositBalance) || 0;
+            let winning = Number(user.winningCash) || 0;
+            let bonus = Number(user.bonusCash) || 0;
+            let total = deposit + winning + bonus;
+            if (total < amount) return;
+            let remaining = amount;
+            if (deposit >= remaining) { deposit -= remaining; remaining = 0; }
+            else { remaining -= deposit; deposit = 0; }
+            if (remaining > 0) {
+                if (winning >= remaining) { winning -= remaining; remaining = 0; }
+                else { remaining -= winning; winning = 0; }
+            }
+            if (remaining > 0) bonus -= remaining;
+            user.depositBalance = deposit;
+            user.winningCash = winning;
+            user.bonusCash = bonus;
+            return user;
+        });
+        if (!result.committed) return false;
+        await db.ref(`transactions/${userId}`).push({
+            type: reason,
+            amount: -amount,
+            description,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+        }
+                          
